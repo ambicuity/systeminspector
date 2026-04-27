@@ -1,0 +1,225 @@
+/* .vitepress/theme/custom.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Neon Gradient Accents - Light Mode */
+  --vp-c-brand-1: #00b8d4;
+  --vp-c-brand-2: #7c22ce;
+  --vp-c-brand-3: #d500d5;
+  --vp-c-brand-soft: rgba(0, 184, 212, 0.16);
+
+  /* Elite Typography */
+  --vp-font-family-base: "Inter", "Roboto", "Helvetica Neue", sans-serif;
+  
+  /* Light Mode Backgrounds */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f6f6f7;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: rgba(0, 0, 0, 0.03);
+
+  /* Borders & Shadows */
+  --vp-c-border: rgba(0, 0, 0, 0.08);
+  --vp-c-divider: rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  /* Neon Gradient Accents - Dark Mode */
+  --vp-c-brand-1: #00e5ff;
+  --vp-c-brand-2: #8a2be2;
+  --vp-c-brand-3: #ff00ff;
+  --vp-c-brand-soft: rgba(0, 229, 255, 0.16);
+  
+  /* Deep Void Backgrounds */
+  --vp-c-bg: #050505;
+  --vp-c-bg-alt: #0a0a0a;
+  --vp-c-bg-elv: #111111;
+  --vp-c-bg-soft: rgba(255, 255, 255, 0.03);
+
+  /* Borders & Shadows */
+  --vp-c-border: rgba(255, 255, 255, 0.08);
+  --vp-c-divider: rgba(255, 255, 255, 0.04);
+}
+
+/* Glassmorphic Navbar */
+.VPNavBar {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--vp-c-border);
+}
+
+.dark .VPNavBar {
+  background-color: rgba(5, 5, 5, 0.6) !important;
+}
+
+/* Neon Gradients for Headings */
+h1 {
+  background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, var(--vp-c-brand-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.vp-doc h3,
+.vp-doc h4 {
+  background: transparent;
+  -webkit-text-fill-color: var(--vp-c-text-1);
+}
+
+/* Pro Max Pagination Links */
+.pager-link {
+  border: 1px solid var(--vp-c-border) !important;
+  background-color: var(--vp-c-bg-alt) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pager-link:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  background-color: var(--vp-c-bg-soft) !important;
+  box-shadow: 0 0 15px var(--vp-c-brand-soft) !important;
+  transform: translateY(-2px);
+}
+
+/* Dark Mode Specific Pagination Pro Max Styling */
+.dark .pager-link {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark .pager-link:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  background: linear-gradient(145deg, rgba(0, 229, 255, 0.08), rgba(138, 43, 226, 0.04)) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Pro Max Table Styling */
+.vp-doc table {
+  background-color: var(--vp-c-bg-soft);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid var(--vp-c-border);
+  border-collapse: separate;
+  border-spacing: 0;
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  margin-top: 1rem;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-brand-soft);
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--vp-c-border) !important;
+}
+
+.vp-doc td, .vp-doc th {
+  padding: 12px 16px;
+  border: none;
+  white-space: nowrap;
+}
+
+.vp-doc tr {
+  border-bottom: 1px solid var(--vp-c-divider);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.vp-doc tbody tr:hover {
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* Custom Scrollbar for Pro Max Feel */
+.vp-doc table::-webkit-scrollbar {
+  height: 8px;
+}
+.vp-doc table::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 12px 12px;
+}
+.vp-doc table::-webkit-scrollbar-thumb {
+  background: var(--vp-c-brand-2);
+  border-radius: 4px;
+}
+.vp-doc table::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-brand-1);
+}
+
+/* Code block glowing borders */
+div[class*='language-'] {
+  border: 1px solid var(--vp-c-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+/* Interactive Features */
+.VPFeature {
+  background-color: var(--vp-c-bg-alt) !important;
+  border: 1px solid var(--vp-c-border) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-radius: 16px;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--vp-c-brand-2) !important;
+  box-shadow: 0 10px 30px -10px rgba(138, 43, 226, 0.4);
+}
+
+/* Global Pro Max Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--vp-c-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--vp-c-border);
+  border-radius: 5px;
+  border: 2px solid var(--vp-c-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-brand-1);
+}
+
+/* Sidebar Glassmorphism */
+.VPSidebar {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--vp-c-border) !important;
+}
+
+.dark .VPSidebar {
+  background-color: rgba(5, 5, 5, 0.7) !important;
+}
+
+/* Doc Aside Glassmorphism */
+.VPDocAside {
+  background: transparent;
+}
+
+/* Pro Max Hero Button */
+.VPButton.brand {
+  background-color: var(--vp-c-brand-2) !important;
+  border-color: var(--vp-c-brand-2) !important;
+  color: #fff !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+}
+
+.VPButton.brand:hover {
+  background-color: var(--vp-c-brand-1) !important;
+  border-color: var(--vp-c-brand-1) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px);
+}

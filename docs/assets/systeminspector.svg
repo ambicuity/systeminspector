@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="102" height="72" viewBox="0 0 102 72" role="img" aria-labelledby="title">
+  <title id="title">systeminspector logo</title>
+  <rect width="102" height="72" rx="10" fill="#1f2937"/>
+  <path d="M21 22h60v28H21z" fill="none" stroke="#f8fafc" stroke-width="4"/>
+  <path d="M31 32h16M31 41h28M66 32h6M66 41h6" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+</svg>
