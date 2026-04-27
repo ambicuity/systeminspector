@@ -307,7 +307,7 @@ GitHub Actions workflows:
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | **CI** (`ci.yml`) | Push/PR to `main` | Lint, typecheck, build, test across Ubuntu/macOS/Windows × Node.js 20/22, plus a Node.js 18 packaged runtime smoke test |
-| **npm Publish** (`npm-publish.yml`) | GitHub Release | Build, test, publish to npm with provenance |
+| **npm Publish** (`npm-publish.yml`) | GitHub Release | Build, test, publish to the public npm registry with provenance |
 | **CodeQL** (`codeql.yml`) | Push/PR + weekly | Security analysis for JavaScript/TypeScript |
 | **Deploy Docs** (`deploy.yml`) | Push to `main` | Build and deploy VitePress site to GitHub Pages |
 
@@ -324,15 +324,22 @@ GitHub Pages must be configured with **Source: GitHub Actions** in repository se
 5. Push: `git push origin main && git push origin vX.Y.Z`.
 6. Create a GitHub Release from the tag — this triggers npm publish automatically.
 
-For the scoped npm package, publish to the public npm registry:
+For the scoped npm package, publish to the public npm registry. This command pins the registry because some developer machines map the `@ambicuity` scope to GitHub Packages:
 
 ```bash
-npm publish --access public --provenance --registry=https://registry.npmjs.org
+npm publish --access public --provenance --registry=https://registry.npmjs.org/
+```
+
+For the forced `v1.0.0` release, verify tag and package availability first:
+
+```bash
+git ls-remote --tags origin v1.0.0
+npm view @ambicuity/systeminspector version --@ambicuity:registry=https://registry.npmjs.org/
 ```
 
 ### Dependency Audit
 
-The published package has zero runtime dependencies. The documentation toolchain currently inherits a moderate dev-server advisory through VitePress/Vite/esbuild; npm does not provide an automatic fix for the current VitePress line. Do not run the VitePress dev server on an untrusted network, and revisit this when VitePress publishes a compatible fixed release.
+The published package has zero runtime dependencies. The documentation toolchain currently inherits a moderate dev-server advisory through VitePress/Vite/esbuild; npm does not provide an automatic fix for the current VitePress line. Do not run the VitePress development server on an untrusted network, and revisit this when VitePress publishes a compatible fixed release.
 
 ---
 

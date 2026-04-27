@@ -4,23 +4,32 @@ description: "Complete SystemInspector documentation and API reference for Tests
 
 # Tests
 
-If you run into problems, you now can easily test if a specific function is supported on your platform and returns plausible results. In this section you will learn how you can easily test all functions on your platform:
+If you run into problems, you can test whether a specific function is supported on your platform and returns plausible results.
 
 ## Testing on your platform
 
-Install the package in a local test project:
+Clone the repository and install development dependencies:
 
-```
-npm install @ambicuity/systeminspector
-```
-
-Now you can start the test with
-
-```
-npm run test
+```bash
+git clone https://github.com/ambicuity/systeminspector.git
+cd systeminspector
+npm install
+npm run build
 ```
 
-You get a nice menu where you now can run function by function and see if you get meaningfull results (if supported on yur platform) or errors. Sample output:
+Run the automated test suite:
+
+```bash
+npm test
+```
+
+For manual platform checks, start the interactive test runner:
+
+```bash
+npm run test:interactive
+```
+
+The interactive runner lets you run functions one by one and inspect whether the returned values are meaningful for your platform. Sample output:
 
 ```
 ╭──────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -81,9 +90,9 @@ You get a nice menu where you now can run function by function and see if you ge
 ╰──────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Press q to exit the test suite
+Press q to exit the interactive test runner.
 
-Here a sample output for the e.g. c ... CPU
+Here is sample output for `c` / CPU:
 
 ```
 ╭──────────────────────────────────────────────────────────────────────────────╮
@@ -117,6 +126,6 @@ Here a sample output for the e.g. c ... CPU
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Make sure to have a look in the documentation if there are already [known issues](issues.html) and if the specific function is supported on your platform. If yes, check whether results are meaningfull and plausible.
+Check the [known issues](issues.html) page if a function returns unsupported values on your platform.
 
 I highly appreciate if you test all functions on your specific platform. This will help me improving the package and provide the best possible platform support.

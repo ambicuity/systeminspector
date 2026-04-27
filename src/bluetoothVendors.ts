@@ -1,4 +1,5 @@
 // Bluetooth vendor MAC prefix lookup table
+// biome-ignore-all lint/complexity/useSimpleNumberKeys: Bluetooth assigned numbers are defined and audited as hexadecimal identifiers.
 const bluetoothVendors: Record<number, string> = {
   0x0000: 'Ericsson Technology Licensing',
   0x0001: 'Nokia Mobile Phones',

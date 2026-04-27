@@ -20,10 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI/CD** with GitHub Actions: matrix testing across Ubuntu, macOS, Windows on Node.js 18, 20, 22.
 - **VitePress documentation site** with full API reference.
 - **Biome** linter and formatter configuration.
+- **Release-ready npm metadata** with strict CommonJS exports, public package contents, MIT license, and Buy Me a Coffee funding metadata.
 
 ### Platform Requirements
 
 - Node.js ≥ 18.0.0
 - Some APIs depend on platform tools (PowerShell, `sensors`, Docker, `smartmontools`, etc.)
+
+### Changed
+
+- Standardized the documentation site on VitePress and removed the old static HTML documentation, legacy Roboto font bundle, and legacy-only image assets.
+- Kept the published npm package lean: only compiled `dist/`, `README.md`, `LICENSE`, and package metadata are included.
 
 [1.0.0]: https://github.com/ambicuity/systeminspector/releases/tag/v1.0.0

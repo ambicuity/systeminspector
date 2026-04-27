@@ -4,12 +4,12 @@ description: "Complete SystemInspector documentation and API reference for Getti
 
 # Getting Started
 
-Systeminspector is a lightweight collection of 58 core inspection functions to retrieve detailed hardware, system and OS information for Node.js.
+SystemInspector is a lightweight collection of 58 core inspection functions to retrieve detailed hardware, system, and OS information for Node.js.
 
 ## Installation
 
 ```bash
-npm install @ambicuity/systeminspector --save
+npm install @ambicuity/systeminspector
 ```
 
 ## Usage Example
@@ -21,7 +21,6 @@ All functions (except `version` and `time`) are implemented as asynchronous func
 ```javascript
 const si = require('@ambicuity/systeminspector');
 
-// promises style - new since version 3
 si.cpu()
   .then(data => console.log(data))
   .catch(error => console.error(error));
