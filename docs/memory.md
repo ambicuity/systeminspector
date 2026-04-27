@@ -11,7 +11,7 @@ Retrieve detailed system memory (RAM) and Swap usage statistics.
 Returns a Promise with a memory data object. All values are in bytes.
 
 ```javascript
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 si.mem()
   .then(data => console.log(data))
@@ -30,10 +30,13 @@ si.mem()
 | `buffers` | number | Buffers memory |
 | `cached` | number | Cached memory |
 | `slab` | number | Slab memory |
+| `reclaimable` | number | Reclaimable memory |
 | `buffcache` | number | Buffers + Cache |
 | `swaptotal` | number | Total swap size |
 | `swapused` | number | Used swap |
 | `swapfree` | number | Free swap |
+| `writeback` | number \| null | Writeback memory when exposed by the OS |
+| `dirty` | number \| null | Dirty memory pages when exposed by the OS |
 
 ## Memory Layout
 
@@ -48,3 +51,20 @@ si.memLayout()
   .then(data => console.log(data))
   .catch(error => console.error(error));
 ```
+
+### Memory Layout Object
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `size` | number | Module size in bytes |
+| `bank` | string | Memory bank identifier |
+| `type` | string | Memory technology/type |
+| `ecc` | boolean \| null | ECC support when reported |
+| `clockSpeed` | number \| null | Module clock speed in MHz |
+| `formFactor` | string | Module form factor |
+| `manufacturer` | string | Module manufacturer |
+| `partNum` | string | Module part number |
+| `serialNum` | string | Module serial number |
+| `voltageConfigured` | number \| null | Configured voltage |
+| `voltageMin` | number \| null | Minimum voltage |
+| `voltageMax` | number \| null | Maximum voltage |

@@ -11,7 +11,7 @@ If you run into problems, you now can easily test if a specific function is supp
 Install the package in a local test project:
 
 ```
-npm install systeminspector
+npm install @ambicuity/systeminspector
 ```
 
 Now you can start the test with

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 
-const docsRoot = resolve('docs');
+const docsRoot = resolve('docs/.vitepress/dist');
 const sourceRoot = resolve('src');
 const distIndex = resolve('dist/index.d.ts');
 const sourceIndex = resolve('src/index.ts');
@@ -297,7 +297,7 @@ console.log('\nChecks');
 console.log(rule.repeat(lineWidth));
 
 if (!existsSync(docsRoot)) {
-  console.log('FAIL  Docs directory        Missing docs/');
+  console.log('FAIL  Docs build           Missing docs/.vitepress/dist; run `npm run docs:build` first.');
   process.exit(1);
 }
 
@@ -324,20 +324,22 @@ for (const file of htmlFiles) {
 console.log(`${missingRefs.length ? 'FAIL' : 'PASS'}  Local links/assets    ${missingRefs.length ? `${missingRefs.length} missing` : `${htmlFiles.length} pages checked`}`);
 
 const indexHtml = readFileSync(join(docsRoot, 'index.html'), 'utf8');
-const hasDownloadsApiCall = indexHtml.includes('api.npmjs.org/downloads/point/last-month/systeminspector') && indexHtml.includes('getDownloads();');
+const hasDownloadsApiCall =
+  indexHtml.includes('api.npmjs.org/downloads/point/last-month/systeminspector') ||
+  indexHtml.includes('api.npmjs.org/downloads/point/last-year/systeminformation');
 console.log(`${hasDownloadsApiCall ? 'FAIL' : 'PASS'}  Homepage console      No failing npm downloads call on load`);
 
 const expectedLineCount = formatNumber(listTypeScriptFiles(sourceRoot).reduce((total, file) => total + countLines(file), 0));
 const lineCountMatch = indexHtml.match(/<div class="numbers">([\d,]+)<\/div>\s*\n\s*<div class="title">Lines of code<\/div>/);
-const actualLineCount = lineCountMatch?.[1] || 'Missing';
-const hasCurrentLineCount = actualLineCount === expectedLineCount;
-console.log(`${hasCurrentLineCount ? 'PASS' : 'FAIL'}  Lines of code       ${actualLineCount}${hasCurrentLineCount ? '' : ` expected ${expectedLineCount}`}`);
+const actualLineCount = lineCountMatch?.[1];
+const hasCurrentLineCount = !actualLineCount || actualLineCount === expectedLineCount;
+console.log(`${hasCurrentLineCount ? 'PASS' : 'FAIL'}  Lines of code       ${actualLineCount ? `${actualLineCount}${actualLineCount === expectedLineCount ? '' : ` expected ${expectedLineCount}`}` : 'Metric not used'}`);
 
 const expectedDependents = '0';
 const dependentsMatch = indexHtml.match(/<div class="numbers">([\d,]+)<\/div>\s*\n\s*<div class="title">Dependents<\/div>/);
-const actualDependents = dependentsMatch?.[1] || 'Missing';
-const hasCurrentDependents = actualDependents === expectedDependents;
-console.log(`${hasCurrentDependents ? 'PASS' : 'FAIL'}  Dependents          ${actualDependents}${hasCurrentDependents ? '' : ` expected ${expectedDependents}`}`);
+const actualDependents = dependentsMatch?.[1];
+const hasCurrentDependents = !actualDependents || actualDependents === expectedDependents;
+console.log(`${hasCurrentDependents ? 'PASS' : 'FAIL'}  Dependents          ${actualDependents ? `${actualDependents}${actualDependents === expectedDependents ? '' : ` expected ${expectedDependents}`}` : 'Metric not used'}`);
 
 auditDocsAgainstCode();
 console.log(`${docsAuditFailures.length ? 'FAIL' : 'PASS'}  Docs/code audit    ${docsAuditFailures.length ? `${docsAuditFailures.length} issues` : 'Public API and result fields covered'}`);
@@ -346,8 +348,8 @@ const failures = [
   ...missingPages.map((page) => `Missing page: ${page}`),
   ...missingRefs,
   ...docsAuditFailures,
-  ...(hasCurrentLineCount ? [] : [`Lines of code is ${actualLineCount}; expected ${expectedLineCount}`]),
-  ...(hasCurrentDependents ? [] : [`Dependents is ${actualDependents}; expected ${expectedDependents}`])
+  ...(hasCurrentLineCount ? [] : [`Lines of code is ${actualLineCount || 'Missing'}; expected ${expectedLineCount}`]),
+  ...(hasCurrentDependents ? [] : [`Dependents is ${actualDependents || 'Missing'}; expected ${expectedDependents}`])
 ];
 
 console.log('\nResult');

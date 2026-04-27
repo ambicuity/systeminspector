@@ -64,7 +64,7 @@ If you discover empty or incorrect values, some underlying commands may need adm
 
 Use diagnostics() to inspect non-breaking diagnostic records for missing tools, permission issues, unsupported hardware, parse failures, command timeouts, encoding issues, outdated dependencies, and optional package loading failures. Use clearDiagnostics() to clear records between checks.
 
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 await si.cpuTemperature();
 console.log(si.diagnostics());
 

@@ -47,7 +47,7 @@
               <div class="text">
                 <p>In this section you will learn how to get detailed information about network interfaces, network connections and statistics as well as some internet related information (latency, check availability of site):</p>
                 <p>For function reference and examples we assume, that we imported <span class="code">systeminspector</span> as follows:</p>
-                <pre><code class="js">const si = require('systeminspector');</code></pre>
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');</code></pre>
                 <h2>Network Interfaces, Network Stats, Network Connections</h2>
                 <p>All functions in this section return a promise or can be called with a callback function (parameter <span class="code">cb</span> in the function reference)</p>
                 <table class="table table-sm table-bordered table-striped">
@@ -278,7 +278,7 @@
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.networkInterfaces().then(data => console.log(data));</code></pre>
                         <pre class="example">
 [
@@ -329,7 +329,7 @@ si.networkInterfaces().then(data => console.log(data));</code></pre>
 ]</pre>
                         <h5>Get Default Interface only</h5>
                         <p>&nbsp;&nbsp;With the 'default' parameter this function returns only the default interface</p>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.networkInterfaces('default').then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -370,7 +370,7 @@ si.networkInterfaces('default').then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.networkInterfaceDefault().then(data => console.log(data));</code></pre>
                         <pre class="example">
 eth0</pre>
@@ -390,7 +390,7 @@ eth0</pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.networkGatewayDefault().then(data => console.log(data));</code></pre>
                         <pre class="example">
 192.168.0.1</pre>
@@ -520,7 +520,7 @@ si.networkGatewayDefault().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.networkStats().then(data => {
     console.log(data);
@@ -653,7 +653,7 @@ setInterval(function() {
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.networkConnections().then(data => console.log(data));</code></pre>
                         <pre class="example">
 [
@@ -752,7 +752,7 @@ si.networkConnections().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.inetChecksite('google.com').then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -777,12 +777,12 @@ si.inetChecksite('google.com').then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.inetLatency().then(data => console.log(data));</code></pre>
                         <pre class="example">
 13.484</pre>
                         <pre><code class="js">// Example with given host IP address
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.inetLatency('216.58.207.142').then(data => console.log(data));</code></pre>
                         <pre class="example">
 11.291</pre>
@@ -801,7 +801,7 @@ si.inetLatency('216.58.207.142').then(data => console.log(data));</code></pre>
 
                 <p>So basically, if you e.g. need a values for filesystem stats stats every second, your code should look like this:</p>
 
-                <pre><code class="js">const si = require('systeminspector');
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.networkStats().then(data => {

@@ -9,7 +9,7 @@ Systeminspector is a lightweight collection of 58 core inspection functions to r
 ## Installation
 
 ```bash
-npm install systeminspector --save
+npm install @ambicuity/systeminspector --save
 ```
 
 ## Usage Example
@@ -19,7 +19,7 @@ All functions (except `version` and `time`) are implemented as asynchronous func
 ### Using Promises
 
 ```javascript
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 // promises style - new since version 3
 si.cpu()
@@ -30,7 +30,7 @@ si.cpu()
 ### Using Async / Await
 
 ```javascript
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 async function getSystemInfo() {
   try {

@@ -9,7 +9,7 @@ In this section you will learn how to get basic system hardware data. We will co
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## System
@@ -64,7 +64,7 @@ Raspberry only |
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.system().then(data => console.log(data));
 ```
 
@@ -83,7 +83,7 @@ si.system().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.uuid().then(data => console.log(data));
 ```
 
@@ -102,7 +102,7 @@ si.uuid().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.bios().then(data => console.log(data));
 ```
 
@@ -131,7 +131,7 @@ si.bios().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.baseboard().then(data => console.log(data));
 ```
 
@@ -150,7 +150,7 @@ si.baseboard().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.chassis().then(data => console.log(data));
 ```
 

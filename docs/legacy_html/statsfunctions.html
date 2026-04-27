@@ -58,7 +58,7 @@
 
                 <p>So basically, if you e.g. need a values for network stats every second, your code should look like this:</p>
 
-                <pre><code class="js">const si = require('systeminspector');
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.networkStats().then(data => {
@@ -96,7 +96,7 @@ setInterval(function() {
                     <td></td>
                     <td colspan="7">
                       <h5>Example</h5>
-                      <pre><code class="js">const si = require('systeminspector');
+                      <pre><code class="js">const si = require('@ambicuity/systeminspector');
 
 // define all values, you want to get back
 valueObject = {

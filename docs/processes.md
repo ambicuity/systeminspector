@@ -9,7 +9,7 @@ In this section you will learn how to get information about current load, runnin
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Current Load, Processes, Services
@@ -82,7 +82,7 @@ The first time you are calling one of this functions, you will get the load sinc
 So basically, your code should look like this:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
               setInterval(function() {
                   si.currentLoad().then(data => {
@@ -98,7 +98,7 @@ Beginning with the second call, you get precise load values between the two call
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.currentLoad().then(data => console.log(data));
 ```
 
@@ -146,7 +146,7 @@ si.currentLoad().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.processes().then(data => console.log(data));
 ```
 
@@ -186,7 +186,7 @@ si.processes().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.processLoad('nginx, postgres').then(data => console.log(data));
 ```
 
@@ -223,7 +223,7 @@ si.processLoad('nginx, postgres').then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.services('mysql, postgres').then(data => console.log(data));
 ```
 

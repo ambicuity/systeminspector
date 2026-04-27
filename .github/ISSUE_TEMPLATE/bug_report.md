@@ -33,7 +33,7 @@ What actually happened. Include error messages, stack traces, or output if appli
 ## Minimal Reproduction
 
 ```js
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 // minimal code to reproduce the issue
 ```
 

@@ -88,7 +88,7 @@
 
                 <h4>Diagnostics</h4>
                 <p>Use <span class="code">diagnostics()</span> to inspect non-breaking diagnostic records for missing tools, permission issues, unsupported hardware, parse failures, command timeouts, encoding issues, outdated dependencies, and optional package loading failures. Use <span class="code">clearDiagnostics()</span> to clear records between checks.</p>
-                <pre>const si = require('systeminspector');
+                <pre>const si = require('@ambicuity/systeminspector');
 await si.cpuTemperature();
 console.log(si.diagnostics());</pre>
 

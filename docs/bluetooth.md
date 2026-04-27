@@ -9,7 +9,7 @@ In this section you will learn how to get information about detected bluetooth d
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Detected Bluetooth Devices
@@ -33,7 +33,7 @@ All functions in this section return a promise or can be called with a callback 
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.bluetoothDevices().then(data => console.log(data));
 ```
 

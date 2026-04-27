@@ -47,7 +47,7 @@
               <div class="text">
                 <p>In this section you will learn how to get CPU data including current speed and temperature:</p>
                 <p>For function reference and examples we assume, that we imported <span class="code">systeminspector</span> as follows:</p>
-                <pre><code class="js">const si = require('systeminspector');</code></pre>
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');</code></pre>
                 <h2>CPU Data</h2>
                 <p>All functions in this section return a promise or can be called with a callback function (parameter <span class="code">cb</span> in the function reference)</p>
                 <table class="table table-sm table-bordered table-striped">
@@ -328,7 +328,7 @@
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.cpu().then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -368,7 +368,7 @@ si.cpu().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.cpuFlags().then(data => console.log(data));</code></pre>
                         <pre class="example">
 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge
@@ -429,7 +429,7 @@ fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.cpuCache().then(data => console.log(data));</code></pre>
                         <pre class="example">
 { l1d: 262144, l1i: 262144, l2: 2097152, l3: 16777216 }
@@ -490,7 +490,7 @@ si.cpuCache().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.cpuCurrentSpeed().then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -571,7 +571,7 @@ si.cpuCurrentSpeed().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.cpuTemperature().then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -651,7 +651,7 @@ si.cpuTemperature().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.currentLoad().then(data => console.log(data));</code></pre>
                         <pre class="example">
 {

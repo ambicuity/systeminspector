@@ -47,7 +47,7 @@
               <div class="text">
                 <p>In this section you will learn how to get disks information, file system information, disk I/O stats and file system stats:</p>
                 <p>For function reference and examples we assume, that we imported <span class="code">systeminspector</span> as follows:</p>
-                <pre><code class="js">const si = require('systeminspector');</code></pre>
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');</code></pre>
                 <h2>Disk Layout, Block Devices and Disks IO</h2>
                 <p>All functions in this section return a promise or can be called with a callback function (parameter <span class="code">cb</span> in the function reference)</p>
                 <table class="table table-sm table-bordered table-striped">
@@ -258,7 +258,7 @@
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.diskLayout().then(data => console.log(data));</code></pre>
                         <pre class="example">
 [
@@ -458,7 +458,7 @@ si.diskLayout().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.blockDevices().then(data => console.log(data));</code></pre>
                         <pre class="example">
 [
@@ -629,7 +629,7 @@ si.blockDevices().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.disksIO().then(data => {
     console.log(data);
@@ -767,7 +767,7 @@ setInterval(function() {
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.fsSize().then(data => console.log(data));</code></pre>
                         <pre class="example">
 [
@@ -831,7 +831,7 @@ si.fsSize().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.fsOpenFiles().then(data => console.log(data));</code></pre>
                         <pre class="example">
 {
@@ -925,7 +925,7 @@ si.fsOpenFiles().then(data => console.log(data));</code></pre>
                       <td></td>
                       <td colspan="7">
                         <h5>Example</h5>
-                        <pre><code class="js">const si = require('systeminspector');
+                        <pre><code class="js">const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.fsStats().then(data => {
     console.log(data);
@@ -965,7 +965,7 @@ setInterval(function() {
 
                 <p>So basically, if you e.g. need a values for filesystem stats stats every second, your code should look like this:</p>
 
-                <pre><code class="js">const si = require('systeminspector');
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.fsStats().then(data => {

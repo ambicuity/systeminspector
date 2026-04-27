@@ -9,6 +9,7 @@ npm-debug.log*
 coverage/
 docs/.vitepress/dist
 docs/.vitepress/cache
+docs/.vitepress/.temp
 .idea/
 .vscode/
 *.swp

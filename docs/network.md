@@ -9,7 +9,7 @@ In this section you will learn how to get detailed information about network int
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Network Interfaces, Network Stats, Network Connections
@@ -89,7 +89,7 @@ The first time you are calling one of this functions, you will get \-1 for trans
 So basically, if you e.g. need a values for filesystem stats stats every second, your code should look like this:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.networkStats().then(data => {
@@ -105,7 +105,7 @@ Beginning with the second call, you get network transfer values per second.
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.networkInterfaces().then(data => console.log(data));
 ```
 
@@ -163,7 +163,7 @@ si.networkInterfaces().then(data => console.log(data));
   With the 'default' parameter this function returns only the default interface
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.networkInterfaces('default').then(data => console.log(data));
 ```
 
@@ -195,7 +195,7 @@ si.networkInterfaces('default').then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.networkInterfaceDefault().then(data => console.log(data));
 ```
 
@@ -206,7 +206,7 @@ eth0
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.networkGatewayDefault().then(data => console.log(data));
 ```
 
@@ -217,7 +217,7 @@ si.networkGatewayDefault().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.networkStats().then(data => {
     console.log(data);
@@ -261,7 +261,7 @@ setInterval(function() {
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.networkConnections().then(data => console.log(data));
 ```
 
@@ -294,7 +294,7 @@ si.networkConnections().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.inetChecksite('google.com').then(data => console.log(data));
 ```
 
@@ -310,7 +310,7 @@ si.inetChecksite('google.com').then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.inetLatency().then(data => console.log(data));
 ```
 
@@ -320,7 +320,7 @@ si.inetLatency().then(data => console.log(data));
 
 ```
 // Example with given host IP address
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.inetLatency('216.58.207.142').then(data => console.log(data));
 ```
 

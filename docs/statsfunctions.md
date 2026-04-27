@@ -15,7 +15,7 @@ Calls made less than 500 ms apart may return cached rate values. Use a steady in
 So basically, if you e.g. need a values for network stats every second, your code should look like this:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.networkStats().then(data => {
@@ -44,7 +44,7 @@ The key names of the valueObject must be exactly the same as the representing fu
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 // define all values, you want to get back
 valueObject = {

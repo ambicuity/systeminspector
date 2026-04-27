@@ -47,7 +47,7 @@
               <div class="text">
                 <p>In this section you will learn how to get information about current load, running processes and installed services:</p>
                 <p>For function reference and examples we assume, that we imported <span class="code">systeminspector</span> as follows:</p>
-                <pre><code class="js">const si = require('systeminspector');</code></pre>
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');</code></pre>
                 <h2>Current Load, Processes, Services</h2>
                 <p>All functions in this section return a promise or can be called with a callback function (parameter <span class="code">cb</span> in the function reference)</p>
                 <table class="table table-sm table-bordered table-striped">
@@ -187,7 +187,7 @@
                     <td></td>
                     <td colspan="7">
                       <h5>Example</h5>
-                      <pre><code class="js">const si = require('systeminspector');
+                      <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.currentLoad().then(data => console.log(data));</code></pre>
                       <pre class="example">
 {
@@ -494,7 +494,7 @@ si.currentLoad().then(data => console.log(data));</code></pre>
                     <td></td>
                     <td colspan="7">
                       <h5>Example</h5>
-                      <pre><code class="js">const si = require('systeminspector');
+                      <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.processes().then(data => console.log(data));</code></pre>
                       <pre class="example">
 {
@@ -593,7 +593,7 @@ si.processes().then(data => console.log(data));</code></pre>
                     <td></td>
                     <td colspan="7">
                       <h5>Example</h5>
-                      <pre><code class="js">const si = require('systeminspector');
+                      <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.processLoad('nginx, postgres').then(data => console.log(data));</code></pre>
                       <pre class="example">
 [
@@ -699,7 +699,7 @@ si.processLoad('nginx, postgres').then(data => console.log(data));</code></pre>
                     <td></td>
                     <td colspan="7">
                       <h5>Example</h5>
-                      <pre><code class="js">const si = require('systeminspector');
+                      <pre><code class="js">const si = require('@ambicuity/systeminspector');
 si.services('mysql, postgres').then(data => console.log(data));</code></pre>
                       <pre class="example">
 [
@@ -734,7 +734,7 @@ si.services('mysql, postgres').then(data => console.log(data));</code></pre>
 
                 <p>So basically, your code should look like this:</p>
 
-                <pre><code class="js">const si = require('systeminspector');
+                <pre><code class="js">const si = require('@ambicuity/systeminspector');
 
               setInterval(function() {
                   si.currentLoad().then(data => {

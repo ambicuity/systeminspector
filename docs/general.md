@@ -9,7 +9,7 @@ In this section you will learn how to get general systeminspector data. We will 
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Lib-Version and Time/Timezone
@@ -116,7 +116,7 @@ As not all funtions are supported in each operating system the result object mig
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 // define all values, you want to get back
 valueObject = {
@@ -165,7 +165,7 @@ si.get(valueObject).then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 // define all values, you want to get back
 // here the value in paretheses goes as a parameter
@@ -193,7 +193,7 @@ si.get(valueObject).then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 // define all values, you want to get back
 // here after the keys we define a filter (pipe symbol after the keys)

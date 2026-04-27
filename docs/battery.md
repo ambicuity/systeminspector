@@ -9,7 +9,7 @@ In this section you will learn how to get battery information - if supported by 
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Battery Data
@@ -47,7 +47,7 @@ Windows battery data comes from PowerShell CIM/WMI providers and sometimes needs
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.battery().then(data => console.log(data));
 ```
 

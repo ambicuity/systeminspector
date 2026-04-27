@@ -7,7 +7,7 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await fetch('https://api.npmjs.org/downloads/point/last-year/systeminformation')
+    const res = await fetch('https://api.npmjs.org/downloads/point/last-year/%40ambicuity%2Fsysteminspector')
     const data = await res.json()
     if (data && data.downloads) {
       // Format number to '12.5M' or '840K' style

@@ -9,7 +9,7 @@ In this section you will learn how to get disks information, file system informa
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Disk Layout, Block Devices and Disks IO
@@ -107,7 +107,7 @@ The first time you are calling one of this functions, you will get \-1 for trans
 So basically, if you e.g. need a values for filesystem stats stats every second, your code should look like this:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 setInterval(function() {
     si.fsStats().then(data => {
@@ -123,7 +123,7 @@ Beginning with the second call, you get file system transfer values per second.
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.diskLayout().then(data => console.log(data));
 ```
 
@@ -164,7 +164,7 @@ si.diskLayout().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.blockDevices().then(data => console.log(data));
 ```
 
@@ -196,7 +196,7 @@ si.blockDevices().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.disksIO().then(data => {
     console.log(data);
@@ -228,7 +228,7 @@ setInterval(function() {
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.fsSize().then(data => console.log(data));
 ```
 
@@ -253,7 +253,7 @@ si.fsSize().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.fsOpenFiles().then(data => console.log(data));
 ```
 
@@ -268,7 +268,7 @@ si.fsOpenFiles().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 setInterval(function() {
   si.fsStats().then(data => {
     console.log(data);

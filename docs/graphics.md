@@ -9,7 +9,7 @@ In this section you will learn how to get information about installed graphics c
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Graphics Controllers, Displays
@@ -74,7 +74,7 @@ All functions in this section return a promise or can be called with a callback 
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.graphics().then(data => console.log(data));
 ```
 

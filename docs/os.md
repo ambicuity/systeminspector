@@ -9,7 +9,7 @@ In this section you will learn how to get information about the installed operat
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Operating System, Shell, Versions, Users
@@ -96,7 +96,7 @@ only those apps are detected |
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.osInfo().then(data => console.log(data));
 ```
 
@@ -122,7 +122,7 @@ si.osInfo().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.uuid().then(data => console.log(data));
 ```
 
@@ -137,7 +137,7 @@ si.uuid().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.versions().then(data => console.log(data));
 ```
 
@@ -187,7 +187,7 @@ si.versions().then(data => console.log(data));
 ##### Example 2
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.versions('npm, php, postgresql').then(data => console.log(data));
 ```
 
@@ -202,7 +202,7 @@ si.versions('npm, php, postgresql').then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.users().then(data => console.log(data));
 ```
 

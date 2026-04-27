@@ -9,7 +9,7 @@ In this section you will learn how to get information about virtual box VMs:
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## VMs

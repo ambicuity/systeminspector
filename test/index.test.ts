@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import * as si from '../src/index';
+import { version as packageVersion } from '../package.json';
 
 describe('SystemInspector Static API', () => {
   it('should have a time function that returns a valid timestamp', () => {
@@ -30,7 +31,7 @@ describe('SystemInspector Static API', () => {
   it('should export version function', () => {
     const v = si.version();
     expect(typeof v).toBe('string');
-    expect(v).toBe('1.0.0');
+    expect(v).toBe(packageVersion);
   });
 
   it('should expose cpu function that returns valid data', async () => {

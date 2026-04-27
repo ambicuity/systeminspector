@@ -9,7 +9,7 @@ In this section you will learn how to get detailed information about available w
 For function reference and examples we assume, that we imported systeminspector as follows:
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 ```
 
 ## Wifi Networks
@@ -69,7 +69,7 @@ All functions in this section return a promise or can be called with a callback 
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.wifiNetworks().then(data => console.log(data));
 ```
 
@@ -106,7 +106,7 @@ si.wifiNetworks().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.wifiInterfaces().then(data => console.log(data));
 ```
 
@@ -126,7 +126,7 @@ si.wifiInterfaces().then(data => console.log(data));
 ##### Example
 
 ```
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 si.wifiConnections().then(data => console.log(data));
 ```
 

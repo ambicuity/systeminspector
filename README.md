@@ -2,13 +2,13 @@
 
 > Lightweight, zero-dependency system and OS inspection library for Node.js.
 
-[![npm version](https://img.shields.io/npm/v/systeminspector.svg)](https://www.npmjs.com/package/systeminspector)
-[![npm downloads](https://img.shields.io/npm/dm/systeminspector.svg)](https://www.npmjs.com/package/systeminspector)
+[![npm version](https://img.shields.io/npm/v/@ambicuity/systeminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
+[![npm downloads](https://img.shields.io/npm/dm/@ambicuity/systeminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
 [![GitHub issues](https://img.shields.io/github/issues/ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/issues?q=is%3Aissue+is%3Aclosed)
-[![license](https://img.shields.io/npm/l/systeminspector.svg)](https://github.com/ambicuity/systeminspector/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/@ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/blob/main/LICENSE)
 [![CI](https://github.com/ambicuity/systeminspector/actions/workflows/ci.yml/badge.svg)](https://github.com/ambicuity/systeminspector/actions/workflows/ci.yml)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/systeminspector)
+[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
 [![Buy Me a Coffee](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange.svg)](https://buymeacoffee.com/ritesh.rana)
 
 ---
@@ -24,7 +24,7 @@ Supported platforms: **Linux**, **macOS**, **Windows**, **FreeBSD**, **OpenBSD**
 ## Installation
 
 ```bash
-npm install systeminspector
+npm install @ambicuity/systeminspector
 ```
 
 Requires **Node.js ≥ 18.0.0**.
@@ -36,7 +36,7 @@ Requires **Node.js ≥ 18.0.0**.
 ### CommonJS
 
 ```js
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 async function main() {
   const cpu = await si.cpu();
@@ -52,7 +52,7 @@ main();
 ### Callback Style
 
 ```js
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 si.cpu((data) => {
   console.log(data);
@@ -67,13 +67,13 @@ SystemInspector includes a CLI for quick terminal inspection.
 
 ```bash
 # Readable system report
-npx systeminspector info
+npx @ambicuity/systeminspector info
 
 # Full static data as JSON (useful for scripts and pipes)
-npx systeminspector
+npx @ambicuity/systeminspector
 
 # Help
-npx systeminspector --help
+npx @ambicuity/systeminspector --help
 ```
 
 ---
@@ -306,10 +306,12 @@ GitHub Actions workflows:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
-| **CI** (`ci.yml`) | Push/PR to `main` | Lint, typecheck, build, test across Ubuntu/macOS/Windows × Node.js 18/20/22 |
+| **CI** (`ci.yml`) | Push/PR to `main` | Lint, typecheck, build, test across Ubuntu/macOS/Windows × Node.js 20/22, plus a Node.js 18 packaged runtime smoke test |
 | **npm Publish** (`npm-publish.yml`) | GitHub Release | Build, test, publish to npm with provenance |
 | **CodeQL** (`codeql.yml`) | Push/PR + weekly | Security analysis for JavaScript/TypeScript |
 | **Deploy Docs** (`deploy.yml`) | Push to `main` | Build and deploy VitePress site to GitHub Pages |
+
+GitHub Pages must be configured with **Source: GitHub Actions** in repository settings before the docs deployment can publish.
 
 ---
 
@@ -322,6 +324,16 @@ GitHub Actions workflows:
 5. Push: `git push origin main && git push origin vX.Y.Z`.
 6. Create a GitHub Release from the tag — this triggers npm publish automatically.
 
+For the scoped npm package, publish to the public npm registry:
+
+```bash
+npm publish --access public --provenance --registry=https://registry.npmjs.org
+```
+
+### Dependency Audit
+
+The published package has zero runtime dependencies. The documentation toolchain currently inherits a moderate dev-server advisory through VitePress/Vite/esbuild; npm does not provide an automatic fix for the current VitePress line. Do not run the VitePress dev server on an untrusted network, and revisit this when VitePress publishes a compatible fixed release.
+
 ---
 
 ## Notes
@@ -331,7 +343,7 @@ the difference between calls. The first call returns `null` for transfer-rate
 fields; subsequent calls return rates based on elapsed time.
 
 ```js
-const si = require('systeminspector');
+const si = require('@ambicuity/systeminspector');
 
 setInterval(() => {
   si.networkStats().then((data) => console.log(data));

@@ -298,11 +298,11 @@ function checkInstalledRequire(): string {
   }
   assertCommand(
     'node',
-    ['-e', "const si = require('systeminspector'); if (typeof si.cpu !== 'function') process.exit(1);"],
+    ['-e', "const si = require('@ambicuity/systeminspector'); if (typeof si.cpu !== 'function') process.exit(1);"],
     'Fix CommonJS package exports and rerun `npm run verify:release`.',
     { cwd: packageState.installDir }
   );
-  return 'require("systeminspector") exposes API';
+  return 'require("@ambicuity/systeminspector") exposes API';
 }
 
 function checkInstalledCli(): string {
@@ -310,7 +310,7 @@ function checkInstalledCli(): string {
     throw new Error('Isolated install directory is not available.');
   }
   assertCommand('npx', ['--no-install', 'systeminspector', 'info'], 'Fix installed CLI behavior and rerun `npm run verify:release`.', { cwd: packageState.installDir });
-  return 'npx systeminspector info exits 0';
+  return 'npx --no-install systeminspector info exits 0';
 }
 
 function cleanupPackageState(): void {

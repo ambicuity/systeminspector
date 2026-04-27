@@ -40,6 +40,13 @@ This policy covers the `systeminspector` npm package and its published source
 code. It does not cover the documentation website infrastructure or third-party
 system tools that the library invokes.
 
+## Dependency Audit Notes
+
+The published npm package has no runtime dependencies. Current npm audit output
+may report a moderate development-only advisory through the VitePress
+documentation toolchain. Do not expose the VitePress development server on an
+untrusted network; production docs are static output.
+
 ## Pre-release Versions
 
 Alpha, beta, and release-candidate builds are not intended for production use.
