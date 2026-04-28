@@ -43,6 +43,24 @@ async function getSystemInfo() {
 getSystemInfo();
 ```
 
+## Command Line
+
+SystemInspector includes a CLI for quick terminal inspection.
+
+```bash
+# Full static data as JSON for scripts and pipes
+npx @ambicuity/systeminspector
+
+# Readable system report
+npx @ambicuity/systeminspector info
+
+# Interactive terminal inspector
+npx @ambicuity/systeminspector interactive
+
+# Command reference
+npx @ambicuity/systeminspector --help
+```
+
 ## Security Advisories
 
 Please review our [security advisories](https://github.com/ambicuity/systeminspector/security/advisories) before deploying to production environments.

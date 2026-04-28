@@ -14,6 +14,7 @@
 
 import * as si from './index';
 import * as pkg from '../package.json';
+import { runInteractive } from './interactive';
 
 const libVersion = pkg.version;
 const WIDTH = 76;
@@ -195,7 +196,7 @@ function printRows(data: Record<string, unknown>, omit: string[] = []): void {
 }
 
 function commandRow(command: string, description: string): string {
-  return `  ${style.cyan(command.padEnd(24))} ${description}`;
+  return `  ${style.cyan(command.padEnd(30))} ${description}`;
 }
 
 function printHelp(): void {
@@ -204,6 +205,7 @@ function printHelp(): void {
   console.log(glyphs.horizontal.repeat(WIDTH));
   console.log(commandRow('systeminspector', 'Print static system data as JSON'));
   console.log(commandRow('systeminspector info', 'Print a readable system report'));
+  console.log(commandRow('systeminspector interactive', 'Open the interactive terminal inspector'));
   console.log(commandRow('systeminspector --help', 'Show this command reference'));
   console.log(`\n${style.dim('Default output is intentionally plain JSON for scripts and pipes.')}`);
 }
@@ -255,6 +257,11 @@ async function main(): Promise<void> {
 
   if (command === 'info') {
     await info();
+    return;
+  }
+
+  if (command === 'interactive') {
+    runInteractive();
     return;
   }
 

@@ -72,6 +72,9 @@ npx @ambicuity/systeminspector info
 # Full static data as JSON (useful for scripts and pipes)
 npx @ambicuity/systeminspector
 
+# Interactive terminal inspector
+npx @ambicuity/systeminspector interactive
+
 # Help
 npx @ambicuity/systeminspector --help
 ```
@@ -307,7 +310,7 @@ GitHub Actions workflows:
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | **CI** (`ci.yml`) | Push/PR to `main` | Lint, typecheck, build, test across Ubuntu/macOS/Windows × Node.js 20/22, plus a Node.js 18 packaged runtime smoke test |
-| **npm Publish** (`npm-publish.yml`) | GitHub Release | Build, test, publish to the public npm registry with provenance |
+| **npm Publish** (`npm-publish.yml`) | GitHub Release/manual | Build, test, publish to npmjs with provenance and mirror to GitHub Packages |
 | **CodeQL** (`codeql.yml`) | Push/PR + weekly | Security analysis for JavaScript/TypeScript |
 | **Deploy Docs** (`deploy.yml`) | Push to `main` | Build and deploy VitePress site to GitHub Pages |
 
@@ -330,10 +333,10 @@ For the scoped npm package, publish to the public npm registry. This command pin
 npm publish --access public --provenance --registry=https://registry.npmjs.org/
 ```
 
-For the forced `v1.0.0` release, verify tag and package availability first:
+For release verification, check the tag and package availability first:
 
 ```bash
-git ls-remote --tags origin v1.0.0
+git ls-remote --tags origin vX.Y.Z
 npm view @ambicuity/systeminspector version --@ambicuity:registry=https://registry.npmjs.org/
 ```
 

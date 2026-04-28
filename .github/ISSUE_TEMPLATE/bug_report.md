@@ -14,7 +14,7 @@ A clear and concise description of the bug.
 
 - **OS**: (e.g., macOS 15.1, Ubuntu 24.04, Windows 11)
 - **Node.js version**: (e.g., 22.x)
-- **systeminspector version**: (e.g., 1.0.0)
+- **systeminspector version**: (e.g., 1.0.1)
 
 ## Steps to Reproduce
 

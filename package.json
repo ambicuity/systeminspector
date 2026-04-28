@@ -1,6 +1,6 @@
 {
   "name": "@ambicuity/systeminspector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight, zero-dependency system and OS inspection library for Node.js. Retrieve detailed hardware, CPU, memory, storage, network, process, Docker, and peripheral information across Linux, macOS, and Windows.",
   "license": "MIT",
   "author": "Ritesh Rana",
@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/ambicuity/systeminspector/issues"
   },
-  "homepage": "https://github.com/ambicuity/systeminspector#readme",
+  "homepage": "https://systeminspector.riteshrana.engineer/gettingstarted.html",
   "funding": {
     "type": "buymeacoffee",
     "url": "https://buymeacoffee.com/ritesh.rana"

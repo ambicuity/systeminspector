@@ -101,7 +101,7 @@ jobs:
 
       - name: Verify CommonJS API
         working-directory: runtime-smoke
-        run: node -e "const si = require('@ambicuity/systeminspector'); if (si.version() !== '1.0.0' || typeof si.cpu !== 'function') process.exit(1);"
+        run: node -e "const si = require('@ambicuity/systeminspector'); if (si.version() !== '1.0.1' || typeof si.cpu !== 'function') process.exit(1);"
 
       - name: Verify CLI
         working-directory: runtime-smoke

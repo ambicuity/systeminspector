@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-04-27
+
+### Added
+
+- Published the interactive terminal inspector as `systeminspector interactive`.
+
+### Changed
+
+- Updated npm homepage metadata to point to the hosted Getting Started documentation.
+- Updated README and documentation command examples for the published interactive CLI.
+
 ## [1.0.0] — 2026-04-27
 
 ### Added
@@ -32,4 +43,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized the documentation site on VitePress and removed the old static HTML documentation, legacy Roboto font bundle, and legacy-only image assets.
 - Kept the published npm package lean: only compiled `dist/`, `README.md`, `LICENSE`, and package metadata are included.
 
+[1.0.1]: https://github.com/ambicuity/systeminspector/releases/tag/v1.0.1
 [1.0.0]: https://github.com/ambicuity/systeminspector/releases/tag/v1.0.0

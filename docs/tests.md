@@ -23,17 +23,23 @@ Run the automated test suite:
 npm test
 ```
 
-For manual platform checks, start the interactive test runner:
+For manual platform checks from the repository, start the interactive test runner:
 
 ```bash
 npm run test:interactive
+```
+
+The published package also exposes the same terminal inspector:
+
+```bash
+npx @ambicuity/systeminspector interactive
 ```
 
 The interactive runner lets you run functions one by one and inspect whether the returned values are meaningful for your platform. Sample output:
 
 ```
 ╭──────────────────────────────────────────────────────────────────────────────────────────────╮
-│ SystemInspector Interactive Terminal v1.0.0                                           ● IDLE │
+│ SystemInspector Interactive Terminal v1.0.1                                           ● IDLE │
 │ Press a command key to run a check. Press q to quit.                                         │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────╯
 
@@ -96,7 +102,7 @@ Here is sample output for `c` / CPU:
 
 ```
 ╭──────────────────────────────────────────────────────────────────────────────╮
-│ CPU v1.0.0                                                           ● READY │
+│ CPU v1.0.1                                                           ● READY │
 │ Command [ c ] CPU   Time to complete 24ms                                    │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭──────────────────────────────────────────────────────────────────────────────╮
