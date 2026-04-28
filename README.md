@@ -2,11 +2,11 @@
 
 > Lightweight, zero-dependency system and OS inspection library for Node.js.
 
-[![npm version](https://img.shields.io/npm/v/@ambicuity/systeminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
-[![npm downloads](https://img.shields.io/npm/dm/@ambicuity/systeminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
+[![npm version](https://img.shields.io/npm/v/%40ambicuity%2Fsysteminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
+[![npm downloads](https://img.shields.io/npm/dm/%40ambicuity%2Fsysteminspector.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
 [![GitHub issues](https://img.shields.io/github/issues/ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/issues?q=is%3Aissue+is%3Aclosed)
-[![license](https://img.shields.io/npm/l/@ambicuity/systeminspector.svg)](https://github.com/ambicuity/systeminspector/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/%40ambicuity%2Fsysteminspector.svg)](https://github.com/ambicuity/systeminspector/blob/main/LICENSE)
 [![CI](https://github.com/ambicuity/systeminspector/actions/workflows/ci.yml/badge.svg)](https://github.com/ambicuity/systeminspector/actions/workflows/ci.yml)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/@ambicuity/systeminspector)
 [![Buy Me a Coffee](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange.svg)](https://buymeacoffee.com/ritesh.rana)
