@@ -201,7 +201,7 @@ Do not compete with enterprise observability products as a SaaS. Compete as a li
 
 ### Confirmed from code
 
-Trust APIs exist, but they are not yet applied uniformly across the full public surface. Fixture extraction has started with `parseLscpu`, but most parsing remains embedded in large modules.
+Trust APIs exist and now include key modernization foundations (dual ESM/CJS packaging, per-call diagnostics scope, API wrapper codegen, and lint-warning ratchet enforcement). Parser extraction has materially expanded with authentic macOS fixtures for filesystem, network, wifi, process, and graphics inputs; however, full domain-module wiring is still in progress.
 
 ### Inferred from code
 
@@ -218,7 +218,7 @@ Maintaining zero runtime dependencies remains a product constraint.
 Feature: Full trust API coverage for high-use APIs  
 Why it matters: Developers need consistent timeout, signal, redaction, envelope, and diagnostics behavior.  
 Competitors that have it: Enterprise agents expose explainable health/status surfaces; direct OSS competitors have maturity by usage.  
-Current repo gap: `cpu` and `getAllData` are ahead of many other APIs.  
+Current repo gap: Per-call diagnostic scoping and wrapper generation are in place, but `InspectOptions` coverage is still uneven across top APIs.  
 User stories: "As a CLI author, I can call any common API with a timeout and receive diagnostics."  
 Technical approach: Add a wrapper helper in `src/index.ts`, then migrate top APIs by domain.  
 Affected files: `src/index.ts`, `src/types.ts`, `docs/general.md`, tests.  
@@ -229,7 +229,7 @@ Priority: P0.
 Feature: Parser fixture expansion  
 Why it matters: OS command output differs by distro, version, locale, and hardware.  
 Competitors that have it: Mature OSS projects rely on long real-world fixture history.  
-Current repo gap: Only a small parser fixture foundation exists.  
+Current repo gap: macOS parser fixture coverage has expanded significantly; Linux/Windows/BSD authentic captures and full consumer-module integration remain follow-up work.  
 User stories: "As a maintainer, I can add a Linux command fixture and lock expected parsing."  
 Technical approach: Extract parser functions gradually and add fixtures by OS/tool.  
 Affected files: `src/parsers.ts`, domain modules, `test/fixtures/**`.  
@@ -515,10 +515,10 @@ Top 10 improvements:
 1. Standardize options and envelope support across high-use APIs.
 2. Expand schema coverage for all major public return types.
 3. Create a typed command abstraction and migrate risky command paths gradually.
-4. Add parser fixtures for CPU, filesystem, network, processes, Docker, and Windows PowerShell.
+4. Complete parser-consumer wiring in domain modules and expand authentic non-macOS fixtures (Linux/Windows/BSD).
 5. Publish stable diagnostic codes and remediation guidance.
 6. Promote redaction and safe support-report workflows.
-7. Burn down lint debt with a CI warning budget.
+7. Continue ratcheting lint warnings down from the tracked baseline.
 8. Add a typed selector builder for `get()`.
 9. Add OpenTelemetry bridge examples.
 10. Automate docs/support matrix validation from source metadata.
@@ -540,6 +540,27 @@ Top differentiation opportunities:
 - OTel integration path.
 
 Suggested next engineering milestone: **v1.1 Trusted Core APIs**.
+
+## Modernization Status (as of May 5, 2026)
+
+Completed on `feat/v1-modernization` (with traceable commits):
+
+- [x] Baseline branch commit of in-flight modernization/trust work (`db241e2`)
+- [x] Emit dual ESM/CJS packages (`ae88d8f`)
+- [x] Clean up PowerShell child on process exit with idempotent hooks (`4473199`)
+- [x] Add per-call diagnostic scope via `AsyncLocalStorage` (`d9b5c6a`)
+- [x] Generate public API wrappers from registry (`bdc84df`)
+- [x] Extract filesystem parsers from authentic macOS captures (`diskutil`, `df`) + fixtures (`70fec46`)
+- [x] Extract network parsers from authentic macOS captures (`ifconfig`, `route`, `netstat`) + fixtures (`02a776d`)
+- [x] Extract wifi parsers from authentic macOS captures (`networksetup`) + fixtures (`38d17c9`)
+- [x] Extract process + graphics parsers from authentic macOS captures (`ps`, `system_profiler`) + fixtures (`252d34a`)
+- [x] Codegen Bluetooth SIG company identifiers + weekly refresh workflow (`7350726`)
+- [x] Ratchet lint warnings against a tracked baseline (`c0a3bb3`)
+
+### Outstanding follow-ups
+
+- Wire extracted parser functions into `filesystem.ts`, `network.ts`, and related domain modules while preserving existing API behavior.
+- Expand authentic fixture captures beyond macOS (Linux/Windows/BSD) to strengthen cross-platform parser confidence.
 
 ## Prioritized GitHub Issue Backlog
 
@@ -588,7 +609,7 @@ Acceptance criteria:
 
 Affected files: `src/parsers.ts`, `test/fixtures/**`, `test/parser-fixtures.test.ts`, domain modules.
 
-Implementation notes: Move one parser at a time to avoid risky broad refactors.
+Implementation notes: macOS foundation is now in place; next step is non-macOS capture expansion plus wiring extracted parsers into domain modules one path at a time.
 
 Priority labels: `P0`, `testing`, `cross-platform`, `reliability`.
 
@@ -620,7 +641,7 @@ Acceptance criteria:
 
 Affected files: `src/**`, `test/**`, `.github/workflows/ci.yml`.
 
-Implementation notes: Use safe autofixes first, then manual fixes for correctness warnings.
+Implementation notes: Warning-regression ratchet is now in place; continue incremental warning burn-down and update baseline only when intentionally ratcheting down with documented rationale.
 
 Priority labels: `P0`, `quality`, `contributor-experience`.
 
