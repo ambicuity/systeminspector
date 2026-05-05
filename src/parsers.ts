@@ -361,3 +361,142 @@ export function parseNetworksetupAirportPower(input: string): ParsedAirportPower
   if (!m) return null;
   return { iface: m[1], on: /on/i.test(m[2]) };
 }
+
+export interface ParsedPsAxoRow {
+  pid: number;
+  user: string;
+  cpu: number;
+  mem: number;
+  command: string;
+}
+
+/**
+ * Parse `ps -axo pid,user,pcpu,pmem,command -c` output (macOS).
+ *
+ *   PID USER              %CPU %MEM COMMAND
+ *     1 root               1.1  0.2 launchd
+ *
+ * Differs from parsePsList (which expects 4 columns); this one accepts
+ * the additional USER column emitted by `-axo`.
+ */
+export function parsePsAxoDarwin(input: string): ParsedPsAxoRow[] {
+  const lines = input.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  return lines.slice(1).map((line) => {
+    const parts = line.split(/\s+/);
+    return {
+      pid: Number.parseInt(parts[0] || '0', 10) || 0,
+      user: parts[1] || '',
+      cpu: Number.parseFloat(parts[2] || '0') || 0,
+      mem: Number.parseFloat(parts[3] || '0') || 0,
+      command: parts.slice(4).join(' ')
+    };
+  });
+}
+
+export interface ParsedSystemProfilerSPDisplays {
+  chipsetModel?: string;
+  type?: string;
+  bus?: string;
+  vendor?: string;
+  cores?: number;
+  metalSupport?: string;
+  displays: Array<{
+    name: string;
+    resolution?: string;
+    main?: boolean;
+    online?: boolean;
+    connectionType?: string;
+  }>;
+}
+
+/**
+ * Parse `system_profiler SPDisplaysDataType` output (macOS).
+ *
+ * The format is a hierarchical key:value tree with 2-space indentation.
+ * For our purposes we extract the first GPU's metadata and a list of
+ * attached displays (each as a sub-stanza two indents deep under
+ * "Displays:").
+ */
+export function parseSystemProfilerSPDisplays(input: string): ParsedSystemProfilerSPDisplays {
+  const out: ParsedSystemProfilerSPDisplays = { displays: [] };
+  const lines = input.split(/\r?\n/);
+  let inDisplaysBlock = false;
+  let currentDisplay: ParsedSystemProfilerSPDisplays['displays'][number] | null = null;
+  let displayIndent = 0;
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, '');
+    if (!line) continue;
+    const indent = line.length - line.trimStart().length;
+    const trimmed = line.trim();
+    const kv = /^([^:]+?):\s*(.*)$/.exec(trimmed);
+    if (!kv) continue;
+    const key = kv[1].trim();
+    const value = kv[2].trim();
+    if (!inDisplaysBlock) {
+      if (key === 'Chipset Model') out.chipsetModel = value;
+      else if (key === 'Type') out.type = value;
+      else if (key === 'Bus') out.bus = value;
+      else if (key === 'Vendor') out.vendor = value;
+      else if (key === 'Total Number of Cores') out.cores = Number.parseInt(value, 10) || undefined;
+      else if (key === 'Metal Support') out.metalSupport = value;
+      else if (key === 'Displays' && !value) {
+        inDisplaysBlock = true;
+        displayIndent = indent;
+      }
+    } else {
+      // Inside Displays block. A line at exactly displayIndent + 2 (one
+      // additional level) and ending in a colon with no value starts a
+      // new display.
+      if (indent === displayIndent + 2 && !value) {
+        currentDisplay = { name: key };
+        out.displays.push(currentDisplay);
+        continue;
+      }
+      // Lines deeper than that belong to the current display.
+      if (currentDisplay && indent > displayIndent + 2) {
+        if (key === 'Resolution') currentDisplay.resolution = value;
+        else if (key === 'Main Display') currentDisplay.main = /yes/i.test(value);
+        else if (key === 'Online') currentDisplay.online = /yes/i.test(value);
+        else if (key === 'Connection Type') currentDisplay.connectionType = value;
+      }
+      // Lines at or shallower than displayIndent end the Displays block.
+      if (indent <= displayIndent && value) {
+        inDisplaysBlock = false;
+        currentDisplay = null;
+      }
+    }
+  }
+  return out;
+}
+
+export interface ParsedSystemProfilerSPMemory {
+  total?: string;
+  type?: string;
+  manufacturer?: string;
+}
+
+/**
+ * Parse `system_profiler SPMemoryDataType` output (macOS).
+ *
+ *   Memory:
+ *
+ *         Memory: 8 GB
+ *         Type: LPDDR5
+ *         Manufacturer: Hynix
+ *
+ * On Apple Silicon the memory is on-package and reports as a single
+ * stanza; on Intel Macs the layout includes per-DIMM slots which we
+ * intentionally don't enumerate here (memLayout in the domain module
+ * already does that path).
+ */
+export function parseSystemProfilerSPMemory(input: string): ParsedSystemProfilerSPMemory {
+  const out: ParsedSystemProfilerSPMemory = {};
+  for (const raw of input.split(/\r?\n/)) {
+    const trimmed = raw.trim();
+    let m: RegExpExecArray | null;
+    if ((m = /^Memory:\s+(\S.+)$/.exec(trimmed))) out.total = m[1].trim();
+    else if ((m = /^Type:\s+(\S.+)$/.exec(trimmed))) out.type = m[1].trim();
+    else if ((m = /^Manufacturer:\s+(\S.+)$/.exec(trimmed))) out.manufacturer = m[1].trim();
+  }
+  return out;
+}
