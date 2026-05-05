@@ -181,13 +181,20 @@ function generate(): string {
   return HEADER + '\n' + blocks.join('\n\n') + '\n';
 }
 
+// Normalise line endings so a Windows checkout (CRLF) compares equal to the
+// generated string (LF). Without this, the freshness check fails on Windows
+// CI even when the file is byte-identical modulo line endings.
+function normalize(s: string): string {
+  return s.replace(/\r\n/g, '\n').trim();
+}
+
 function main() {
   const targetPath = resolve(__dirname, '..', 'src', 'index.generated.ts');
   const next = generate();
   const checkMode = process.argv.includes('--check');
   if (checkMode) {
     const current = readFileSync(targetPath, 'utf8');
-    if (current.trim() !== next.trim()) {
+    if (normalize(current) !== normalize(next)) {
       process.stderr.write(`src/index.generated.ts is stale.\nRun \`npm run codegen:api\` to refresh.\n`);
       process.exit(1);
     }

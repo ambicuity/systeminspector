@@ -1,0 +1,23 @@
+# Force LF line endings for all source/config files so Windows checkouts
+# don't trip the codegen freshness checks (which compare on-disk content
+# to generated output emitted with LF).
+
+* text=auto eol=lf
+
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
+# Binary assets — leave untouched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary

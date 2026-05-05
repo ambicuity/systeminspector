@@ -82,9 +82,10 @@ async function main(): Promise<void> {
     } catch {
       // file missing — treat as stale
     }
-    // Allow the Fetched: date to differ; only flag content drift.
-    const stripDate = (s: string) => s.replace(/^\/\/ Fetched:.*$/m, '// Fetched: <DATE>');
-    if (stripDate(current) !== stripDate(next)) {
+    // Allow the Fetched: date to differ and normalise CRLF→LF so a
+    // Windows checkout doesn't trip the freshness check on line endings.
+    const normalize = (s: string) => s.replace(/\r\n/g, '\n').replace(/^\/\/ Fetched:.*$/m, '// Fetched: <DATE>');
+    if (normalize(current) !== normalize(next)) {
       process.stderr.write(`src/bluetoothVendors.ts is stale (${entries.length} upstream entries).\nRun \`npm run codegen:bluetooth-vendors\` to refresh.\n`);
       process.exit(1);
     }
