@@ -47,6 +47,13 @@ jobs:
       - name: Codegen freshness (public API)
         run: npm run codegen:api:check
 
+      - name: Codegen freshness (Bluetooth vendors)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        run: npm run codegen:bluetooth-vendors:check
+        # Soft check — upstream SIG updates shouldn't block unrelated PRs;
+        # the weekly refresh-bluetooth-vendors workflow opens a PR instead.
+        continue-on-error: true
+
       - name: Typecheck
         run: npm run typecheck
 

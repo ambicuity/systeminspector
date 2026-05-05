@@ -36,6 +36,8 @@
     "prebuild": "node scripts/write-version.js && npm run codegen:api",
     "codegen:api": "tsx scripts/codegen-public-api.ts",
     "codegen:api:check": "tsx scripts/codegen-public-api.ts --check",
+    "codegen:bluetooth-vendors": "tsx scripts/generate-bluetooth-vendors.ts",
+    "codegen:bluetooth-vendors:check": "tsx scripts/generate-bluetooth-vendors.ts --check",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p tsconfig.json && chmod +x dist/cjs/cli.js",
     "build:esm": "tsc -p tsconfig.esm.json && node scripts/finalize-esm.js",
