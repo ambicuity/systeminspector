@@ -50,6 +50,7 @@ const WINDIR = process.env.WINDIR || 'C:\\Windows';
 
 // powerShell
 let _psChild: ChildProcess | null = null;
+let _psExitHooked = false;
 let _psResult = '';
 const _psCmds: Array<{ id: string; cmd: string; callback: (data: string) => void; start: Date }> = [];
 let _psPersistent = false;
@@ -567,6 +568,26 @@ function powerShellStart() {
           _psChild.kill();
         }
       });
+      _psChild.unref?.();
+      if (!_psExitHooked) {
+        _psExitHooked = true;
+        const cleanup = () => {
+          try {
+            powerShellRelease();
+          } catch {
+            // best-effort cleanup; nothing to do if it throws
+          }
+        };
+        process.once('exit', cleanup);
+        process.once('SIGINT', () => {
+          cleanup();
+          process.exit(130);
+        });
+        process.once('SIGTERM', () => {
+          cleanup();
+          process.exit(143);
+        });
+      }
     }
   }
 }
