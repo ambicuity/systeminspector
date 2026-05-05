@@ -220,17 +220,26 @@ export function parseIfconfigDarwin(input: string): ParsedIfconfigDarwin | null 
   };
   for (const raw of lines.slice(1)) {
     const line = raw.trim();
-    let m: RegExpExecArray | null;
-    if ((m = /^ether\s+([0-9a-f:]{17})/i.exec(line))) {
-      result.mac = m[1];
-    } else if ((m = /^inet\s+(\d{1,3}(?:\.\d{1,3}){3})(?:\s+netmask\s+(\S+))?(?:\s+broadcast\s+(\S+))?/.exec(line))) {
-      result.ip4 = m[1];
-      if (m[2]) result.ip4Netmask = m[2];
-      if (m[3]) result.ip4Broadcast = m[3];
-    } else if ((m = /^inet6\s+([0-9a-f:]+(?:%\S+)?)/i.exec(line))) {
-      result.ip6!.push(m[1]);
-    } else if ((m = /^status:\s+(\S+)/.exec(line))) {
-      result.status = m[1] === 'active' || m[1] === 'inactive' ? (m[1] as 'active' | 'inactive') : 'unknown';
+    const ether = /^ether\s+([0-9a-f:]{17})/i.exec(line);
+    if (ether) {
+      result.mac = ether[1];
+      continue;
+    }
+    const inet = /^inet\s+(\d{1,3}(?:\.\d{1,3}){3})(?:\s+netmask\s+(\S+))?(?:\s+broadcast\s+(\S+))?/.exec(line);
+    if (inet) {
+      result.ip4 = inet[1];
+      if (inet[2]) result.ip4Netmask = inet[2];
+      if (inet[3]) result.ip4Broadcast = inet[3];
+      continue;
+    }
+    const inet6 = /^inet6\s+([0-9a-f:]+(?:%\S+)?)/i.exec(line);
+    if (inet6) {
+      result.ip6!.push(inet6[1]);
+      continue;
+    }
+    const status = /^status:\s+(\S+)/.exec(line);
+    if (status) {
+      result.status = status[1] === 'active' || status[1] === 'inactive' ? (status[1] as 'active' | 'inactive') : 'unknown';
     }
   }
   if (!result.ip6!.length) delete result.ip6;
@@ -315,10 +324,20 @@ export function parseNetworksetupHardwarePorts(input: string): ParsedHardwarePor
       current = {};
       continue;
     }
-    let m: RegExpExecArray | null;
-    if ((m = /^Hardware Port:\s+(.+)$/.exec(line))) current.hardwarePort = m[1].trim();
-    else if ((m = /^Device:\s+(\S+)/.exec(line))) current.device = m[1];
-    else if ((m = /^Ethernet Address:\s+(\S+)/.exec(line))) current.ethernetAddress = m[1];
+    const hp = /^Hardware Port:\s+(.+)$/.exec(line);
+    if (hp) {
+      current.hardwarePort = hp[1].trim();
+      continue;
+    }
+    const dev = /^Device:\s+(\S+)/.exec(line);
+    if (dev) {
+      current.device = dev[1];
+      continue;
+    }
+    const eth = /^Ethernet Address:\s+(\S+)/.exec(line);
+    if (eth) {
+      current.ethernetAddress = eth[1];
+    }
   }
   if (current.hardwarePort && current.device && current.ethernetAddress) {
     ports.push(current as ParsedHardwarePort);
@@ -493,10 +512,20 @@ export function parseSystemProfilerSPMemory(input: string): ParsedSystemProfiler
   const out: ParsedSystemProfilerSPMemory = {};
   for (const raw of input.split(/\r?\n/)) {
     const trimmed = raw.trim();
-    let m: RegExpExecArray | null;
-    if ((m = /^Memory:\s+(\S.+)$/.exec(trimmed))) out.total = m[1].trim();
-    else if ((m = /^Type:\s+(\S.+)$/.exec(trimmed))) out.type = m[1].trim();
-    else if ((m = /^Manufacturer:\s+(\S.+)$/.exec(trimmed))) out.manufacturer = m[1].trim();
+    const mem = /^Memory:\s+(\S.+)$/.exec(trimmed);
+    if (mem) {
+      out.total = mem[1].trim();
+      continue;
+    }
+    const type = /^Type:\s+(\S.+)$/.exec(trimmed);
+    if (type) {
+      out.type = type[1].trim();
+      continue;
+    }
+    const manuf = /^Manufacturer:\s+(\S.+)$/.exec(trimmed);
+    if (manuf) {
+      out.manufacturer = manuf[1].trim();
+    }
   }
   return out;
 }

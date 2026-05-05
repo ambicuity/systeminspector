@@ -44,6 +44,8 @@
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json",
     "lint": "biome lint src/ test/",
+    "lint:check": "tsx scripts/check-lint-baseline.ts",
+    "lint:baseline": "tsx scripts/check-lint-baseline.ts --update",
     "format": "biome format --write src/ test/",
     "test": "vitest run",
     "test:interactive": "tsx ./test/test.ts",
