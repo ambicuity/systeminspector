@@ -4,19 +4,21 @@
   "description": "Lightweight, zero-dependency system and OS inspection library for Node.js. Retrieve detailed hardware, CPU, memory, storage, network, process, Docker, and peripheral information across Linux, macOS, and Windows.",
   "license": "MIT",
   "author": "Ritesh Rana",
-  "main": "./dist/index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
   "type": "commonjs",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
     }
   },
   "bin": {
-    "systeminspector": "dist/cli.js"
+    "systeminspector": "dist/cjs/cli.js"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/cjs/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ambicuity/systeminspector.git"
@@ -31,8 +33,10 @@
   },
   "scripts": {
     "clean": "rm -rf dist *.tgz",
-    "build": "tsc",
-    "postbuild": "chmod +x dist/cli.js",
+    "prebuild": "node scripts/write-version.js",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -p tsconfig.json && chmod +x dist/cjs/cli.js",
+    "build:esm": "tsc -p tsconfig.esm.json && node scripts/finalize-esm.js",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json",
     "lint": "biome lint src/ test/",

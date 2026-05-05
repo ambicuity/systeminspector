@@ -13,11 +13,9 @@
 // ==================================================================================
 
 import * as si from './index';
-import * as pkg from '../package.json';
+import { VERSION as libVersion } from './version.generated';
 import { runInteractive } from './interactive';
 import { redactData } from './redaction';
-
-const libVersion = pkg.version;
 const WIDTH = 76;
 const LABEL_WIDTH = 18;
 const VALUE_WIDTH = WIDTH - LABEL_WIDTH - 5;

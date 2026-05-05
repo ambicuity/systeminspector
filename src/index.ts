@@ -10,7 +10,7 @@
 // License:       MIT
 // ==================================================================================
 
-import { version as libVersion } from '../package.json';
+import { VERSION as libVersion } from './version.generated';
 import * as util from './util';
 export * from './types';
 import * as capabilityModule from './capabilities';

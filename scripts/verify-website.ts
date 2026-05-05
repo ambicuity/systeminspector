@@ -3,7 +3,7 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
 
 const docsRoot = resolve('docs/.vitepress/dist');
 const sourceRoot = resolve('src');
-const distIndex = resolve('dist/index.d.ts');
+const distIndex = resolve('dist/cjs/index.d.ts');
 const sourceIndex = resolve('src/index.ts');
 const sourceTypes = resolve('src/types.ts');
 const lineWidth = 76;
@@ -215,7 +215,7 @@ function auditDocsAgainstCode(): void {
   const distOnly = distExports.filter((name) => !srcExports.includes(name));
 
   for (const name of srcOnly) {
-    docsAuditFailures.push(`Export missing from dist/index.d.ts: ${name}`);
+    docsAuditFailures.push(`Export missing from dist/cjs/index.d.ts: ${name}`);
   }
   for (const name of distOnly) {
     docsAuditFailures.push(`Export missing from src/index.ts: ${name}`);

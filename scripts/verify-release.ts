@@ -247,7 +247,7 @@ function checkPublicExports(): string {
 }
 
 function checkCliOutputQuality(): string {
-  const result = assertCommand('node', ['dist/cli.js', 'info'], 'Fix the CLI report output and rerun `npm run verify:release`.');
+  const result = assertCommand('node', ['dist/cjs/cli.js', 'info'], 'Fix the CLI report output and rerun `npm run verify:release`.');
   const output = `${result.stdout}\n${result.stderr}`;
   for (const expected of ['SystemInspector', 'Operating System', 'CPU']) {
     if (!output.includes(expected)) {
@@ -360,10 +360,10 @@ async function main(): Promise<void> {
     {
       name: 'CLI executable',
       run: () => {
-        if (!existsSync('dist/cli.js')) {
-          throw new Error('dist/cli.js was not found.');
+        if (!existsSync('dist/cjs/cli.js')) {
+          throw new Error('dist/cjs/cli.js was not found.');
         }
-        assertCommand('node', ['dist/cli.js', '--help'], 'Rebuild the CLI and rerun `npm run verify:release`.');
+        assertCommand('node', ['dist/cjs/cli.js', '--help'], 'Rebuild the CLI and rerun `npm run verify:release`.');
       }
     },
     {

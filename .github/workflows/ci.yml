@@ -113,9 +113,24 @@ jobs:
           npm init -y
           npm install --ignore-scripts --no-audit --no-fund ../package-smoke/*.tgz
 
+      - name: Read expected version from package tarball
+        id: version
+        run: |
+          TARBALL=$(ls package-smoke/*.tgz | head -n1)
+          VALUE=$(echo "$TARBALL" | sed -E 's|.*-([0-9][^/]+)\.tgz$|\1|')
+          echo "value=$VALUE" >> "$GITHUB_OUTPUT"
+
       - name: Verify CommonJS API
         working-directory: runtime-smoke
-        run: node -e "const si = require('@ambicuity/systeminspector'); if (si.version() !== '1.0.1' || typeof si.cpu !== 'function') process.exit(1);"
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.value }}
+        run: node -e "const si = require('@ambicuity/systeminspector'); if (si.version() !== process.env.EXPECTED_VERSION || typeof si.cpu !== 'function') process.exit(1);"
+
+      - name: Verify ESM API
+        working-directory: runtime-smoke
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.value }}
+        run: node --input-type=module -e "import * as si from '@ambicuity/systeminspector'; if (si.version() !== process.env.EXPECTED_VERSION || typeof si.cpu !== 'function') process.exit(1);"
 
       - name: Verify CLI
         working-directory: runtime-smoke
