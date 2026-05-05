@@ -159,14 +159,14 @@ async function withInspectOptions<T>(
 ): Promise<T | InspectEnvelope<T>> {
   options = util.applyInspectPolicy((options || {}) as InspectOptions) as InspectOptions | InspectEnvelopeOptions;
   const started = Date.now();
-  const beforeDiagnostics = diagnostics().length;
-  let data = await util.withTimeout(functionName, task(), options?.timeoutMs || 0, options?.signal);
+  const scope = { records: [] as DiagnosticRecord[] };
+  let data = await util.diagnosticContext.run(scope, () => util.withTimeout(functionName, task(), options?.timeoutMs || 0, options?.signal));
   data = redactData(data, options?.redact);
   if ((options as InspectEnvelopeOptions | undefined)?.envelope) {
     const envelope: InspectEnvelope<T> = {
       schemaVersion: schemaVersion(),
       data,
-      diagnostics: diagnostics().slice(beforeDiagnostics) as DiagnosticRecord[],
+      diagnostics: scope.records,
       durationMs: Date.now() - started,
       source: functionName,
       platform: process.platform,

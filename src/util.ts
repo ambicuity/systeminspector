@@ -16,7 +16,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawn, exec, execSync, execFile, type ExecSyncOptions, type SpawnOptions } from 'child_process';
 import type { ChildProcess } from 'child_process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DiagnosticRecord, DiagnosticsOptions, DiagnosticSeverity, InspectOptions } from './types';
+
+const diagnosticContext = new AsyncLocalStorage<{ records: DiagnosticRecord[] }>();
 
 interface CommandSpec {
   feature: string;
@@ -432,6 +435,10 @@ function pushDiagnostic(diagnostic: any) {
     feature,
     ...diagnostic
   };
+  const ctx = diagnosticContext.getStore();
+  if (ctx) {
+    ctx.records.push(record);
+  }
   _diagnostics.push(record);
   if (_diagnostics.length > 200) {
     _diagnostics.shift();
@@ -3221,6 +3228,7 @@ export {
   smartMonToolsInstalled,
   smartMonToolsInfo,
   diagnostics,
+  diagnosticContext,
   clearDiagnostics,
   onDiagnostic,
   pushDiagnostic,
