@@ -79,6 +79,7 @@ export const baseboard: (callback?: Callback<BaseboardData>) => Promise<Baseboar
 
 export const chassis: (callback?: Callback<ChassisData>) => Promise<ChassisData> = systemModule.chassis;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function osInfo(callback?: Callback<OsData>): Promise<OsData>;
 export function osInfo(options?: InspectOptions, callback?: Callback<OsData>): Promise<OsData>;
 export function osInfo(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<OsData>>): Promise<InspectEnvelope<OsData>>;
@@ -92,6 +93,7 @@ export const shell: (callback?: Callback<string>) => Promise<string> = osInfoMod
 
 export const uuid: (callback?: Callback<UuidData>) => Promise<UuidData> = osInfoModule.uuid as unknown as (callback?: Callback<UuidData>) => Promise<UuidData>;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function cpu(callback?: Callback<CpuData>): Promise<CpuData>;
 export function cpu(options?: InspectOptions, callback?: Callback<CpuData>): Promise<CpuData>;
 export function cpu(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<CpuData>>): Promise<InspectEnvelope<CpuData>>;
@@ -111,6 +113,7 @@ export const currentLoad: (callback?: Callback<CurrentLoadData>) => Promise<Curr
 
 export const fullLoad: (callback?: Callback<number>) => Promise<number> = cpuModule.fullLoad as unknown as (callback?: Callback<number>) => Promise<number>;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function mem(callback?: Callback<MemData>): Promise<MemData>;
 export function mem(options?: InspectOptions, callback?: Callback<MemData>): Promise<MemData>;
 export function mem(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<MemData>>): Promise<InspectEnvelope<MemData>>;
@@ -120,6 +123,7 @@ export function mem(options?: any, callback?: any): Promise<MemData | InspectEnv
 
 export const memLayout: (callback?: Callback<MemLayoutData[]>) => Promise<MemLayoutData[]> = memoryModule.memLayout;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function graphics(callback?: Callback<MaybeUnsupported<GraphicsData>>): Promise<MaybeUnsupported<GraphicsData>>;
 export function graphics(options?: InspectOptions, callback?: Callback<MaybeUnsupported<GraphicsData>>): Promise<MaybeUnsupported<GraphicsData>>;
 export function graphics(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<MaybeUnsupported<GraphicsData>>>): Promise<InspectEnvelope<MaybeUnsupported<GraphicsData>>>;
@@ -127,9 +131,11 @@ export function graphics(options?: any, callback?: any): Promise<MaybeUnsupporte
   return wrapInspectFunction<MaybeUnsupported<GraphicsData>>('graphics', () => graphicsModule.graphics(undefined), options, callback);
 }
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function fsSize(callback?: Callback<FsSizeData[]>): Promise<FsSizeData[]>;
 export function fsSize(options?: InspectOptions, callback?: Callback<FsSizeData[]>): Promise<FsSizeData[]>;
 export function fsSize(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<FsSizeData[]>>): Promise<InspectEnvelope<FsSizeData[]>>;
+/** @deprecated Use the InspectOptions object form instead (e.g. { drive: "/" }). The positional form will be removed in v2.0. */
 export function fsSize(drive?: string | Callback<FsSizeData[]>, callback?: Callback<FsSizeData[]>): Promise<FsSizeData[]>;
 export function fsSize(optionsOrDrive?: any, callback?: any): Promise<FsSizeData[] | InspectEnvelope<FsSizeData[]>> {
   if (typeof optionsOrDrive === 'string') {
@@ -149,6 +155,7 @@ export const fsStats: (callback?: Callback<FsStatsData>) => Promise<FsStatsData>
 
 export const disksIO: (callback?: Callback<DisksIoData>) => Promise<DisksIoData> = filesystemModule.disksIO as unknown as (callback?: Callback<DisksIoData>) => Promise<DisksIoData>;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function diskLayout(callback?: Callback<DiskLayoutData[]>): Promise<DiskLayoutData[]>;
 export function diskLayout(options?: InspectOptions, callback?: Callback<DiskLayoutData[]>): Promise<DiskLayoutData[]>;
 export function diskLayout(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<DiskLayoutData[]>>): Promise<InspectEnvelope<DiskLayoutData[]>>;
@@ -160,6 +167,7 @@ export const networkInterfaceDefault: (callback?: Callback<string>) => Promise<s
 
 export const networkGatewayDefault: (callback?: Callback<string>) => Promise<string> = networkModule.networkGatewayDefault as unknown as (callback?: Callback<string>) => Promise<string>;
 
+/** @deprecated Use the InspectOptions object form instead (e.g. { rescan: true, defaultString: "..." }). The positional form will be removed in v2.0. */
 export function networkInterfaces(callback?: Callback<NetworkInterfacesData[]> | boolean | string, rescan?: boolean, defaultString?: string): Promise<NetworkInterfacesData[]>;
 export function networkInterfaces(options?: InspectOptions, callback?: Callback<NetworkInterfacesData[]>): Promise<NetworkInterfacesData[]>;
 export function networkInterfaces(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<NetworkInterfacesData[]>>): Promise<InspectEnvelope<NetworkInterfacesData[]>>;
@@ -187,6 +195,7 @@ export const wifiConnections: (callback?: Callback<WifiConnectionData[]>) => Pro
 
 export const services: (srv?: string | Callback<ServicesData[]>, callback?: Callback<ServicesData[]>) => Promise<ServicesData[]> = processesModule.services as unknown as (srv?: string | Callback<ServicesData[]>, callback?: Callback<ServicesData[]>) => Promise<ServicesData[]>;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function processes(callback?: Callback<ProcessesData>): Promise<ProcessesData>;
 export function processes(options?: InspectOptions, callback?: Callback<ProcessesData>): Promise<ProcessesData>;
 export function processes(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<ProcessesData>>): Promise<InspectEnvelope<ProcessesData>>;
@@ -214,6 +223,7 @@ export const dockerContainerProcesses: (containerID?: string, callback?: Callbac
 
 export const dockerVolumes: (callback?: Callback<DockerVolumeData[]>) => Promise<DockerVolumeData[]> = dockerModule.dockerVolumes;
 
+/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */
 export function dockerAll(callback?: Callback<any[]>): Promise<any[]>;
 export function dockerAll(options?: InspectOptions, callback?: Callback<any[]>): Promise<any[]>;
 export function dockerAll(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<any[]>>): Promise<InspectEnvelope<any[]>>;

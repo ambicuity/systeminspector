@@ -98,8 +98,15 @@ function emitLegacyDirect(name: string, signature: string, src: string): string 
   return `export const ${name}: ${signature} = ${src};`;
 }
 
+// JSDoc emitted on every callback-style overload — IDE strikethrough + warning,
+// but no runtime change. Signals v2.0 direction without breaking v1.x consumers.
+const CALLBACK_DEPRECATION = '/** @deprecated Pass an InspectOptions object and consume the returned Promise. The callback overload will be removed in v2.0. */';
+const POSITIONAL_DEPRECATION = (paramHint: string) =>
+  `/** @deprecated Use the InspectOptions object form instead (e.g. ${paramHint}). The positional form will be removed in v2.0. */`;
+
 function emitModern(name: string, dataType: string, src: string, callForm: string): string {
   return [
+    CALLBACK_DEPRECATION,
     `export function ${name}(callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function ${name}(options?: InspectOptions, callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function ${name}(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<${dataType}>>): Promise<InspectEnvelope<${dataType}>>;`,
@@ -110,12 +117,13 @@ function emitModern(name: string, dataType: string, src: string, callForm: strin
 }
 
 function emitHybridFsSize(): string {
-  // fsSize: positional `drive` arg OR options object.
   const dataType = 'FsSizeData[]';
   return [
+    CALLBACK_DEPRECATION,
     `export function fsSize(callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function fsSize(options?: InspectOptions, callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function fsSize(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<${dataType}>>): Promise<InspectEnvelope<${dataType}>>;`,
+    POSITIONAL_DEPRECATION('{ drive: "/" }'),
     `export function fsSize(drive?: string | Callback<${dataType}>, callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function fsSize(optionsOrDrive?: any, callback?: any): Promise<${dataType} | InspectEnvelope<${dataType}>> {`,
     `  if (typeof optionsOrDrive === 'string') {`,
@@ -132,6 +140,7 @@ function emitHybridFsSize(): string {
 function emitHybridNetworkInterfaces(): string {
   const dataType = 'NetworkInterfacesData[]';
   return [
+    POSITIONAL_DEPRECATION('{ rescan: true, defaultString: "..." }'),
     `export function networkInterfaces(callback?: Callback<${dataType}> | boolean | string, rescan?: boolean, defaultString?: string): Promise<${dataType}>;`,
     `export function networkInterfaces(options?: InspectOptions, callback?: Callback<${dataType}>): Promise<${dataType}>;`,
     `export function networkInterfaces(options: InspectEnvelopeOptions, callback?: Callback<InspectEnvelope<${dataType}>>): Promise<InspectEnvelope<${dataType}>>;`,
