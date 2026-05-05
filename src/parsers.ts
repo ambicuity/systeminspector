@@ -95,3 +95,91 @@ export function parseDockerPs(input: string): number {
     .filter(Boolean)
     .slice(1).length;
 }
+
+export interface ParsedDiskutilRow {
+  identifier: string;
+  type: string;
+  name: string;
+  size: string;
+}
+
+/**
+ * Parse `diskutil list` output (macOS).
+ *
+ * Each disk has a header (`/dev/disk0 (internal, physical):`) followed by
+ * a column-aligned table:
+ *
+ *     #:                       TYPE NAME                    SIZE       IDENTIFIER
+ *     0:      GUID_partition_scheme                        *500.3 GB   disk0
+ *     1:                        EFI EFI                     314.6 MB   disk0s1
+ *
+ * We return a flat list of partition rows across all disks, skipping
+ * headers and "Physical Store" lines (which describe APFS containers).
+ */
+export function parseDiskutilList(input: string): ParsedDiskutilRow[] {
+  const rows: ParsedDiskutilRow[] = [];
+  // TYPE is right-aligned in the header, NAME / SIZE / IDENTIFIER are left-aligned.
+  // We derive the data column boundaries from the LEFT edge of NAME, SIZE, and
+  // IDENTIFIER (where the columns start), and treat the TYPE column as
+  // everything from the end of the row prefix up to NAME.
+  let bounds: { typeEnd: number; sizeStart: number; identifierStart: number } | null = null;
+  for (const raw of input.split(/\r?\n/)) {
+    const line = raw.trimEnd();
+    if (/TYPE\s+NAME\s+SIZE\s+IDENTIFIER/.test(line)) {
+      const nameStart = line.indexOf('NAME');
+      const sizeStart = line.indexOf('SIZE', nameStart + 4);
+      const identifierStart = line.indexOf('IDENTIFIER', sizeStart + 4);
+      bounds = { typeEnd: nameStart, sizeStart, identifierStart };
+      continue;
+    }
+    if (!bounds) continue;
+    const prefix = /^(\s*\d+:\s*)/.exec(line);
+    if (!prefix) continue;
+    const type = line.slice(prefix[1].length, bounds.typeEnd).trim();
+    const name = line.slice(bounds.typeEnd, bounds.sizeStart).trim();
+    const size = line.slice(bounds.sizeStart, bounds.identifierStart).trim();
+    const identifier = line.slice(bounds.identifierStart).trim();
+    if (!identifier.startsWith('disk')) continue;
+    rows.push({ type, name, size, identifier });
+  }
+  return rows;
+}
+
+export interface ParsedDfRowDarwin {
+  filesystem: string;
+  totalKb: number;
+  usedKb: number;
+  availableKb: number;
+  capacity: number;
+  mount: string;
+}
+
+/**
+ * Parse `df -kP` output. macOS / BSD have 1024-byte blocks (kB) when -k
+ * is set; -P forces a single-line POSIX format that is robust to long
+ * filesystem names.
+ *
+ *     Filesystem    1024-blocks      Used Available Capacity  Mounted on
+ *     /dev/disk3s1s1  482797652  12163828  38615968    24%    /
+ */
+export function parseDfDarwin(input: string): ParsedDfRowDarwin[] {
+  const rows: ParsedDfRowDarwin[] = [];
+  const lines = input.split(/\r?\n/);
+  for (const raw of lines.slice(1)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const parts = line.split(/\s+/);
+    if (parts.length < 6) continue;
+    const capacity = Number.parseInt(parts[4].replace('%', ''), 10);
+    if (Number.isNaN(capacity)) continue;
+    rows.push({
+      filesystem: parts[0],
+      totalKb: Number.parseInt(parts[1], 10) || 0,
+      usedKb: Number.parseInt(parts[2], 10) || 0,
+      availableKb: Number.parseInt(parts[3], 10) || 0,
+      capacity,
+      mount: parts.slice(5).join(' ')
+    });
+  }
+  return rows;
+}
