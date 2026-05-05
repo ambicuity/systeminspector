@@ -287,3 +287,77 @@ export function parseNetstatRoutes(input: string): number {
   }
   return count;
 }
+
+export interface ParsedHardwarePort {
+  hardwarePort: string;
+  device: string;
+  ethernetAddress: string;
+}
+
+/**
+ * Parse `networksetup -listallhardwareports` output (macOS).
+ *
+ * Sequence of stanzas separated by blank lines:
+ *
+ *   Hardware Port: Wi-Fi
+ *   Device: en0
+ *   Ethernet Address: 02:00:00:00:00:04
+ */
+export function parseNetworksetupHardwarePorts(input: string): ParsedHardwarePort[] {
+  const ports: ParsedHardwarePort[] = [];
+  let current: Partial<ParsedHardwarePort> = {};
+  for (const raw of input.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) {
+      if (current.hardwarePort && current.device && current.ethernetAddress) {
+        ports.push(current as ParsedHardwarePort);
+      }
+      current = {};
+      continue;
+    }
+    let m: RegExpExecArray | null;
+    if ((m = /^Hardware Port:\s+(.+)$/.exec(line))) current.hardwarePort = m[1].trim();
+    else if ((m = /^Device:\s+(\S+)/.exec(line))) current.device = m[1];
+    else if ((m = /^Ethernet Address:\s+(\S+)/.exec(line))) current.ethernetAddress = m[1];
+  }
+  if (current.hardwarePort && current.device && current.ethernetAddress) {
+    ports.push(current as ParsedHardwarePort);
+  }
+  return ports;
+}
+
+export interface ParsedAirportNetwork {
+  ssid: string | null;
+  associated: boolean;
+}
+
+/**
+ * Parse `networksetup -getairportnetwork <iface>` output (macOS).
+ *
+ * Two shapes:
+ *   "Current Wi-Fi Network: <SSID>"
+ *   "You are not associated with an AirPort network."
+ */
+export function parseNetworksetupAirportNetwork(input: string): ParsedAirportNetwork {
+  const trimmed = input.trim();
+  const m = /^Current Wi-Fi Network:\s+(.+)$/m.exec(trimmed);
+  if (m) return { ssid: m[1].trim(), associated: true };
+  return { ssid: null, associated: false };
+}
+
+export interface ParsedAirportPower {
+  iface: string;
+  on: boolean;
+}
+
+/**
+ * Parse `networksetup -getairportpower <iface>` output (macOS).
+ *
+ *   "Wi-Fi Power (en0): On"
+ *   "Wi-Fi Power (en0): Off"
+ */
+export function parseNetworksetupAirportPower(input: string): ParsedAirportPower | null {
+  const m = /Wi-Fi Power\s*\((\S+?)\):\s*(On|Off)/i.exec(input);
+  if (!m) return null;
+  return { iface: m[1], on: /on/i.test(m[2]) };
+}
