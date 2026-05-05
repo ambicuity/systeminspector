@@ -147,7 +147,6 @@ import type {
   SystemData,
   TimeData,
   UsbData,
-  UserData,
   UuidData,
   VersionData,
   WatchOptions,

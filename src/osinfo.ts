@@ -247,7 +247,7 @@ function osInfo(callback: any) {
       };
 
       if (_linux) {
-        exec('cat /etc/*-release; cat /usr/lib/os-release; cat /etc/openwrt_release', (error: any, stdout: any) => {
+        exec('cat /etc/*-release; cat /usr/lib/os-release; cat /etc/openwrt_release', (_error: any, stdout: any) => {
           /**
            * @namespace
            * @property {string}  DISTRIB_ID
@@ -292,7 +292,7 @@ function osInfo(callback: any) {
         });
       }
       if (_freebsd || _openbsd || _netbsd) {
-        exec('sysctl kern.ostype kern.osrelease kern.osrevision kern.hostuuid machdep.bootmethod kern.geom.confxml', (error: any, stdout: any) => {
+        exec('sysctl kern.ostype kern.osrelease kern.osrevision kern.hostuuid machdep.bootmethod kern.geom.confxml', (_error: any, stdout: any) => {
           const lines = stdout.toString().split('\n');
           const distro = util.getValue(lines, 'kern.ostype');
           const logofile = getLogoFile(distro);
@@ -315,7 +315,7 @@ function osInfo(callback: any) {
         });
       }
       if (_darwin) {
-        exec('sw_vers; sysctl kern.ostype kern.osrelease kern.osrevision kern.uuid', (error: any, stdout: any) => {
+        exec('sw_vers; sysctl kern.ostype kern.osrelease kern.osrevision kern.uuid', (_error: any, stdout: any) => {
           const lines = stdout.toString().split('\n');
           result.serial = util.getValue(lines, 'kern.uuid');
           result.distro = util.getValue(lines, 'ProductName');
@@ -351,7 +351,7 @@ function osInfo(callback: any) {
       }
       if (_sunos) {
         result.release = result.kernel;
-        exec('uname -o', (error: any, stdout: any) => {
+        exec('uname -o', (_error: any, stdout: any) => {
           const lines = stdout.toString().split('\n');
           result.distro = lines[0];
           result.logofile = getLogoFile(result.distro);
@@ -1250,7 +1250,7 @@ function uuid(callback: any) {
         const cmd = `echo -n "os: "; cat /var/lib/dbus/machine-id 2> /dev/null ||
 cat /etc/machine-id 2> /dev/null; echo;
 echo -n "hardware: "; cat /sys/class/dmi/id/product_uuid 2> /dev/null; echo;`;
-        exec(cmd, (error: any, stdout: any) => {
+        exec(cmd, (_error: any, stdout: any) => {
           const lines = stdout.toString().split('\n');
           result.os = util.getValue(lines, 'os').toLowerCase();
           result.hardware = util.getValue(lines, 'hardware').toLowerCase();
@@ -1266,7 +1266,7 @@ echo -n "hardware: "; cat /sys/class/dmi/id/product_uuid 2> /dev/null; echo;`;
         });
       }
       if (_freebsd || _openbsd || _netbsd) {
-        exec('sysctl -i kern.hostid kern.hostuuid', (error: any, stdout: any) => {
+        exec('sysctl -i kern.hostid kern.hostuuid', (_error: any, stdout: any) => {
           const lines = stdout.toString().split('\n');
           result.hardware = util.getValue(lines, 'kern.hostid', ':').toLowerCase();
           result.os = util.getValue(lines, 'kern.hostuuid', ':').toLowerCase();
@@ -1290,7 +1290,7 @@ echo -n "hardware: "; cat /sys/class/dmi/id/product_uuid 2> /dev/null; echo;`;
         util.powerShell('Get-CimInstance Win32_ComputerSystemProduct | select UUID | fl').then((stdout: any) => {
           const lines = stdout.split('\r\n');
           result.hardware = util.getValue(lines, 'uuid', ':').toLowerCase();
-          exec(`${sysdir}\\reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid`, util.execOptsWin, (error: any, stdout: any) => {
+          exec(`${sysdir}\\reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid`, util.execOptsWin, (_error: any, stdout: any) => {
             parts = stdout.toString().split('\n\r')[0].split('REG_SZ');
             result.os = parts.length > 1 ? parts[1].replace(/\r+|\n+|\s+/gi, '').toLowerCase() : '';
             if (callback) {

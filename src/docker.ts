@@ -283,7 +283,7 @@ export function dockerContainers(all?: boolean | string | Callback<DockerContain
             }
             resolve(result);
           }
-        } catch (err) {
+        } catch (_err) {
           // GC in _docker_container_stats
           for (const key in _docker_container_stats) {
             if (Object.hasOwn(_docker_container_stats, key)) {

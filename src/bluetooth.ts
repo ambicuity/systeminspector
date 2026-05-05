@@ -110,8 +110,8 @@ function parseBluetoothManufacturer(str: any) {
 }
 
 function parseBluetoothVendor(str: any) {
-  const id = parseInt(str);
-  if (!isNaN(id)) return bluetoothVendors[id];
+  const id = parseInt(str, 10);
+  if (!Number.isNaN(id)) return bluetoothVendors[id];
 }
 
 function parseLinuxBluetoothInfo(lines: string[], macAddr1: string | null, macAddr2: string | null): Partial<BluetoothDeviceData> {

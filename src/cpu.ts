@@ -901,7 +901,7 @@ function getCpu() {
         result.flags = flags;
         result.virtualization = flags.indexOf('vmx') > -1 || flags.indexOf('svm') > -1;
         if (_darwin) {
-          exec('sysctl machdep.cpu hw.cpufrequency_max hw.cpufrequency_min hw.packages hw.physicalcpu_max hw.ncpu hw.tbfrequency hw.cpufamily hw.cpusubfamily', (error: any, stdout: any) => {
+          exec('sysctl machdep.cpu hw.cpufrequency_max hw.cpufrequency_min hw.packages hw.physicalcpu_max hw.ncpu hw.tbfrequency hw.cpufamily hw.cpusubfamily', (_error: any, stdout: any) => {
             const lines = stdout.toString().split('\n');
             const modelline = util.getValue(lines, 'machdep.cpu.brand_string');
             const modellineParts = modelline.split('@');
@@ -940,8 +940,8 @@ function getCpu() {
               result.processors = parseInt(countProcessors, 10) || 1;
             }
             if (countCores && countThreads) {
-              result.cores = parseInt(countThreads) || util.cores();
-              result.physicalCores = parseInt(countCores) || util.cores();
+              result.cores = parseInt(countThreads, 10) || util.cores();
+              result.physicalCores = parseInt(countCores, 10) || util.cores();
             }
             cpuCache(undefined).then((res: any) => {
               result.cache = res;
@@ -990,19 +990,19 @@ function getCpu() {
             result.revision = util.getValue(lines, 'cpu revision');
             result.cache.l1d = util.getValue(lines, 'l1d cache');
             if (result.cache.l1d) {
-              result.cache.l1d = parseInt(result.cache.l1d) * (result.cache.l1d.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l1d.indexOf('K') !== -1 ? 1024 : 1);
+              result.cache.l1d = parseInt(result.cache.l1d, 10) * (result.cache.l1d.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l1d.indexOf('K') !== -1 ? 1024 : 1);
             }
             result.cache.l1i = util.getValue(lines, 'l1i cache');
             if (result.cache.l1i) {
-              result.cache.l1i = parseInt(result.cache.l1i) * (result.cache.l1i.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l1i.indexOf('K') !== -1 ? 1024 : 1);
+              result.cache.l1i = parseInt(result.cache.l1i, 10) * (result.cache.l1i.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l1i.indexOf('K') !== -1 ? 1024 : 1);
             }
             result.cache.l2 = util.getValue(lines, 'l2 cache');
             if (result.cache.l2) {
-              result.cache.l2 = parseInt(result.cache.l2) * (result.cache.l2.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l2.indexOf('K') !== -1 ? 1024 : 1);
+              result.cache.l2 = parseInt(result.cache.l2, 10) * (result.cache.l2.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l2.indexOf('K') !== -1 ? 1024 : 1);
             }
             result.cache.l3 = util.getValue(lines, 'l3 cache');
             if (result.cache.l3) {
-              result.cache.l3 = parseInt(result.cache.l3) * (result.cache.l3.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l3.indexOf('K') !== -1 ? 1024 : 1);
+              result.cache.l3 = parseInt(result.cache.l3, 10) * (result.cache.l3.indexOf('M') !== -1 ? 1024 * 1024 : result.cache.l3.indexOf('K') !== -1 ? 1024 : 1);
             }
 
             const threadsPerCore = util.getValue(lines, 'thread(s) per core') || '1';
@@ -1039,7 +1039,7 @@ function getCpu() {
 
             // socket type
             let lines2: any[] = [];
-            exec('export LC_ALL=C; dmidecode –t 4 2>/dev/null | grep "Upgrade: Socket"; unset LC_ALL', (error2: any, stdout2: any) => {
+            exec('export LC_ALL=C; dmidecode –t 4 2>/dev/null | grep "Upgrade: Socket"; unset LC_ALL', (_error2: any, stdout2: any) => {
               lines2 = stdout2.toString().split('\n');
               if (lines2 && lines2.length) {
                 result.socket = util.getValue(lines2, 'Upgrade').replace('Socket', '').trim() || result.socket;
@@ -1090,7 +1090,7 @@ function getCpu() {
             result.stepping = util.getValue(sig, 'Stepping', ' ', true);
             result.revision = '';
             const voltage = parseFloat(util.getValue(lines, 'voltage'));
-            result.voltage = isNaN(voltage) ? '' : voltage.toFixed(2);
+            result.voltage = Number.isNaN(voltage) ? '' : voltage.toFixed(2);
             for (let i = 0; i < cache.length; i++) {
               lines = cache[i].split('\n');
               const cacheTypeParts = util.getValue(lines, 'Socket Designation').toLowerCase().replace(' ', '-').split('-');
@@ -1186,8 +1186,8 @@ function getCpu() {
                 result.processors = countProcessors || 1;
               }
               if (countCores && countThreads) {
-                result.cores = parseInt(countThreads) || util.cores();
-                result.physicalCores = parseInt(countCores) || util.cores();
+                result.cores = parseInt(countThreads, 10) || util.cores();
+                result.physicalCores = parseInt(countCores, 10) || util.cores();
               }
               if (countProcessors > 1) {
                 result.cores = result.cores * countProcessors;
@@ -1199,7 +1199,7 @@ function getCpu() {
 
               resolve(result);
             });
-          } catch (e) {
+          } catch (_e) {
             resolve(result);
           }
         }
@@ -1273,7 +1273,7 @@ function getCpuCurrentSpeedSync() {
         avg: parseFloat(avgFreq.toFixed(2)),
         cores: cores
       };
-    } catch (e) {
+    } catch (_e) {
       return {
         min: 0,
         max: 0,
@@ -1328,7 +1328,7 @@ function cpuTemperature(callback: any) {
     return machine || process.arch;
   }
 
-  function applyOsxTemperature(result: any) {
+  function applyOsxTemperature(_result: any) {
     const osxTemp = require('osx-temperature-sensor');
     const res = osxTemp.cpuTemperature();
     if (res.main) {
@@ -1434,14 +1434,14 @@ function cpuTemperature(callback: any) {
               }
             }
           }
-        } catch (e) {
+        } catch (_e) {
           util.noop();
         }
 
         const cmd =
           'for mon in /sys/class/hwmon/hwmon*; do for label in "$mon"/temp*_label; do if [ -f $label ]; then value=${label%_*}_input; echo $(cat "$label")___$(cat "$value"); fi; done; done;';
         try {
-          exec(cmd, (error: any, stdout: any) => {
+          exec(cmd, (_error: any, stdout: any) => {
             stdout = stdout.toString();
             const tdiePos = stdout.toLowerCase().indexOf('tdie');
             if (tdiePos !== -1) {
@@ -1563,7 +1563,7 @@ function cpuTemperature(callback: any) {
                       const lines = stdout.toString().split('\n');
                       if (lines.length > 0) {
                         const value = parseFloat(lines[0]) / 1000.0;
-                        if (!isNaN(value)) {
+                        if (!Number.isNaN(value)) {
                           result.main = value;
                           result.max = result.main;
                         }
@@ -1650,10 +1650,10 @@ function cpuTemperature(callback: any) {
               const lines = stdout
                 .split('\r\n')
                 .filter((line: any) => line.trim() !== '')
-                .filter((line: any, idx: any) => idx > 0);
+                .filter((_line: any, idx: any) => idx > 0);
               lines.forEach((line: any) => {
                 const value = (parseInt(line, 10) - 2732) / 10;
-                if (!isNaN(value)) {
+                if (!Number.isNaN(value)) {
                   sum = sum + value;
                   if (value > result.max) {
                     result.max = value;
@@ -1862,16 +1862,16 @@ function cpuCache(callback: any) {
               lines.forEach((line: any) => {
                 const parts = line.split(':');
                 if (parts[0].toUpperCase().indexOf('L1D CACHE') !== -1) {
-                  result.l1d = parseInt(parts[1].trim()) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                  result.l1d = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
                 }
                 if (parts[0].toUpperCase().indexOf('L1I CACHE') !== -1) {
-                  result.l1i = parseInt(parts[1].trim()) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                  result.l1i = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
                 }
                 if (parts[0].toUpperCase().indexOf('L2 CACHE') !== -1) {
-                  result.l2 = parseInt(parts[1].trim()) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                  result.l2 = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
                 }
                 if (parts[0].toUpperCase().indexOf('L3 CACHE') !== -1) {
-                  result.l3 = parseInt(parts[1].trim()) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                  result.l3 = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('M') !== -1 ? 1024 * 1024 : parts[1].indexOf('K') !== -1 ? 1024 : 1);
                 }
               });
             }
@@ -1925,16 +1925,16 @@ function cpuCache(callback: any) {
             lines.forEach((line: any) => {
               const parts = line.split(':');
               if (parts[0].toLowerCase().indexOf('hw.l1icachesize') !== -1) {
-                result.l1d = parseInt(parts[1].trim()) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                result.l1d = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
               }
               if (parts[0].toLowerCase().indexOf('hw.l1dcachesize') !== -1) {
-                result.l1i = parseInt(parts[1].trim()) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                result.l1i = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
               }
               if (parts[0].toLowerCase().indexOf('hw.l2cachesize') !== -1) {
-                result.l2 = parseInt(parts[1].trim()) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                result.l2 = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
               }
               if (parts[0].toLowerCase().indexOf('hw.l3cachesize') !== -1) {
-                result.l3 = parseInt(parts[1].trim()) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
+                result.l3 = parseInt(parts[1].trim(), 10) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
               }
             });
           }

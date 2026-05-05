@@ -47,8 +47,8 @@ function parseWinBatteryPart(lines: any, designedCapacity: any, fullChargeCapaci
     const statusValue = status;
     result.status = statusValue;
     result.hasBattery = true;
-    result.maxCapacity = fullChargeCapacity || parseInt(String(util.getValue(lines, 'DesignCapacity', ':') || 0));
-    result.designedCapacity = parseInt(util.getValue(lines, 'DesignCapacity', ':') || designedCapacity);
+    result.maxCapacity = fullChargeCapacity || parseInt(String(util.getValue(lines, 'DesignCapacity', ':') || 0), 10);
+    result.designedCapacity = parseInt(util.getValue(lines, 'DesignCapacity', ':') || designedCapacity, 10);
     result.voltage = (parseInt(util.getValue(lines, 'DesignVoltage', ':'), 10) || 0) / 1000;
     result.capacityUnit = 'mWh';
     result.percent = parseInt(util.getValue(lines, 'EstimatedChargeRemaining', ':'), 10) || 0;
@@ -173,7 +173,7 @@ function battery(callback?: Callback<BatteryData>) {
         }
       }
       if (_freebsd || _openbsd || _netbsd) {
-        exec('sysctl -i hw.acpi.battery hw.acpi.acline', (error, stdout) => {
+        exec('sysctl -i hw.acpi.battery hw.acpi.acline', (_error, stdout) => {
           const lines = stdout.toString().split('\n');
           const batteries = parseInt('0' + util.getValue(lines, 'hw.acpi.battery.units'), 10);
           const percent = parseInt('0' + util.getValue(lines, 'hw.acpi.battery.life'), 10);
@@ -195,7 +195,7 @@ function battery(callback?: Callback<BatteryData>) {
       if (_darwin) {
         exec(
           'ioreg -n AppleSmartBattery -r | egrep "CycleCount|IsCharging|DesignCapacity|MaxCapacity|CurrentCapacity|DeviceName|BatterySerialNumber|Serial|TimeRemaining|Voltage"; pmset -g batt | grep %',
-          (error, stdout) => {
+          (_error, stdout) => {
             if (stdout) {
               const lines = stdout.toString().replace(/ +/g, '').replace(/"+/g, '').replace(/-/g, '').split('\n');
               result.cycleCount = parseInt('0' + util.getValue(lines, 'cyclecount', '='), 10);

@@ -82,7 +82,7 @@ const execOptsLinux: ExecSyncOptions = {
 
 function toInt(value: any) {
   let result = parseInt(value, 10);
-  if (isNaN(result)) {
+  if (Number.isNaN(result)) {
     result = 0;
   }
   return result;
@@ -1652,7 +1652,7 @@ function promisifySave(nodeStyleFunction: (...args: any[]) => void): (...args: a
   return () => {
     const args = Array.prototype.slice.call(arguments);
     return new Promise((resolve) => {
-      args.push((err: any, data: any) => {
+      args.push((_err: any, data: any) => {
         resolve(data);
       });
       nodeStyleFunction.apply(null, args);
@@ -1769,7 +1769,7 @@ function plistParser(xmlStr: any) {
                 metaData[depth].data = parseFloat(metaData[depth].tagContent) || 0;
               }
               if (metaData[depth].tagEnd === '/integer' && metaData[depth].tagContent) {
-                metaData[depth].data = parseInt(metaData[depth].tagContent) || 0;
+                metaData[depth].data = parseInt(metaData[depth].tagContent, 10) || 0;
               }
               if (metaData[depth].tagEnd === '/string' && metaData[depth].tagContent) {
                 metaData[depth].data = metaData[depth].tagContent || '';
@@ -1813,7 +1813,7 @@ function plistParser(xmlStr: any) {
 }
 
 function strIsNumeric(str: any) {
-  return typeof str === 'string' && !isNaN(Number(str)) && !isNaN(parseFloat(str));
+  return typeof str === 'string' && !Number.isNaN(Number(str)) && !Number.isNaN(parseFloat(str));
 }
 
 function plistReader(output: any) {
@@ -1849,7 +1849,7 @@ function plistReader(output: any) {
   let obj: Record<string, any> = {};
   try {
     obj = JSON.parse(output);
-  } catch (e) {
+  } catch (_e) {
     noop();
   }
   return obj;

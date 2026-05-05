@@ -242,7 +242,7 @@ function parseLinesWindowsNics(sections: any, nconfigsections: any) {
               name: ifacename,
               iface,
               netEnabled: netEnabled === 'TRUE',
-              speed: isNaN(speed) ? null : speed,
+              speed: Number.isNaN(speed) ? null : speed,
               operstate: util.getValue(lines, 'NetConnectionStatus', ':') === '2' ? 'up' : 'down',
               type: adapterType
             });
@@ -480,7 +480,7 @@ function parseLinesDarwinNics(sections: any) {
     nic.iface = first.split(':')[0].trim();
     const parts = first.split('> mtu');
     nic.mtu = parts.length > 1 ? parseInt(parts[1], 10) : null;
-    if (isNaN(nic.mtu)) {
+    if (Number.isNaN(nic.mtu)) {
       nic.mtu = null;
     }
     nic.internal = parts[0].toLowerCase().indexOf('loopback') > -1;
@@ -994,11 +994,11 @@ function networkInterfaces(callback: any, rescan: any, defaultString: any) {
               duplex = duplex.startsWith('cat') ? '' : duplex;
               mtu = parseInt(util.getValue(lines, 'mtu'), 10) as any;
               let myspeed = parseInt(util.getValue(lines, 'speed'), 10);
-              speed = isNaN(myspeed) ? null : myspeed;
+              speed = Number.isNaN(myspeed) ? null : myspeed;
               const wirelessspeed = util.getValue(lines, 'tx bitrate');
               if (speed === null && wirelessspeed) {
                 myspeed = parseFloat(wirelessspeed);
-                speed = isNaN(myspeed) ? null : myspeed;
+                speed = Number.isNaN(myspeed) ? null : myspeed;
               }
               carrierChanges = parseInt(util.getValue(lines, 'carrier_changes'), 10);
               const operstate = util.getValue(lines, 'operstate');
@@ -1434,19 +1434,19 @@ function networkStatsSingle(iface: any) {
               for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].replace(/ +/g, ' ').split(' ');
                 if (line && line[0] && line[7] && line[10]) {
-                  rx_bytes = rx_bytes + parseInt(line[7]);
+                  rx_bytes = rx_bytes + parseInt(line[7], 10);
                   if (line[6].trim() !== '-') {
-                    rx_dropped = rx_dropped + parseInt(line[6]);
+                    rx_dropped = rx_dropped + parseInt(line[6], 10);
                   }
                   if (line[5].trim() !== '-') {
-                    rx_errors = rx_errors + parseInt(line[5]);
+                    rx_errors = rx_errors + parseInt(line[5], 10);
                   }
-                  tx_bytes = tx_bytes + parseInt(line[10]);
+                  tx_bytes = tx_bytes + parseInt(line[10], 10);
                   if (line[12].trim() !== '-') {
-                    tx_dropped = tx_dropped + parseInt(line[12]);
+                    tx_dropped = tx_dropped + parseInt(line[12], 10);
                   }
                   if (line[9].trim() !== '-') {
-                    tx_errors = tx_errors + parseInt(line[9]);
+                    tx_errors = tx_errors + parseInt(line[9], 10);
                   }
                   operstate = 'up';
                 }
@@ -1458,7 +1458,7 @@ function networkStatsSingle(iface: any) {
         }
         if (_darwin) {
           cmd = 'ifconfig ' + ifaceSanitized + ' | grep "status"'; // lgtm [js/shell-command-constructed-from-input]
-          exec(cmd, (error: any, stdout: any) => {
+          exec(cmd, (_error: any, stdout: any) => {
             result.operstate = (stdout.toString().split(':')[1] || '').trim();
             result.operstate = (result.operstate || '').toLowerCase();
             result.operstate = result.operstate === 'active' ? 'up' : result.operstate === 'inactive' ? 'down' : 'unknown';
@@ -1472,12 +1472,12 @@ function networkStatsSingle(iface: any) {
                   // use the second line because it is tied to the NIC instead of the ipv4 or ipv6 address
                   stats = lines[1].replace(/ +/g, ' ').split(' ');
                   const offset = stats.length > 11 ? 1 : 0;
-                  rx_bytes = parseInt(stats[offset + 5]);
-                  rx_dropped = parseInt(stats[offset + 10]);
-                  rx_errors = parseInt(stats[offset + 4]);
-                  tx_bytes = parseInt(stats[offset + 8]);
-                  tx_dropped = parseInt(stats[offset + 10]);
-                  tx_errors = parseInt(stats[offset + 7]);
+                  rx_bytes = parseInt(stats[offset + 5], 10);
+                  rx_dropped = parseInt(stats[offset + 10], 10);
+                  rx_errors = parseInt(stats[offset + 4], 10);
+                  tx_bytes = parseInt(stats[offset + 8], 10);
+                  tx_dropped = parseInt(stats[offset + 10], 10);
+                  tx_errors = parseInt(stats[offset + 7], 10);
                   result = calcNetworkSpeed(ifaceSanitized, rx_bytes, tx_bytes, result.operstate, rx_dropped, rx_errors, tx_dropped, tx_errors);
                 }
               }
@@ -1538,7 +1538,7 @@ function networkStatsSingle(iface: any) {
                   });
                 });
                 if (rx_bytes && tx_bytes) {
-                  result = calcNetworkSpeed(ifaceName, parseInt(rx_bytes as any), parseInt(tx_bytes as any), operstate, rx_dropped, rx_errors, tx_dropped, tx_errors);
+                  result = calcNetworkSpeed(ifaceName, parseInt(rx_bytes as any, 10), parseInt(tx_bytes as any, 10), operstate, rx_dropped, rx_errors, tx_dropped, tx_errors);
                 }
                 resolve(result);
               });
@@ -1703,7 +1703,7 @@ function networkConnections(callback: any) {
         const states = 'ESTABLISHED|SYN_SENT|SYN_RECV|FIN_WAIT1|FIN_WAIT_1|FIN_WAIT2|FIN_WAIT_2|TIME_WAIT|CLOSE|CLOSE_WAIT|LAST_ACK|LISTEN|CLOSING|UNKNOWN'.split('|');
         exec(cmd, { maxBuffer: 1024 * 102400 }, (error: any, stdout: any) => {
           if (!error) {
-            exec('ps -axo pid,command', { maxBuffer: 1024 * 102400 }, (err2: any, stdout2: any) => {
+            exec('ps -axo pid,command', { maxBuffer: 1024 * 102400 }, (_err2: any, stdout2: any) => {
               let processes = stdout2.toString().split('\n');
               processes = processes.map((line: any) => {
                 return line.trim().replace(/ +/g, ' ');
@@ -1926,7 +1926,7 @@ function networkGatewayDefault(callback: any) {
             }
             if (!result) {
               cmd = "netstat -rn | awk '/default/ {print $2}'";
-              exec(cmd, { maxBuffer: 1024 * 102400 }, (error: any, stdout: any) => {
+              exec(cmd, { maxBuffer: 1024 * 102400 }, (_error: any, stdout: any) => {
                 const lines = stdout
                   .toString()
                   .split('\n')

@@ -216,7 +216,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
                 const cache = parseInt(util.getValue(lines, 'vm.stats.vm.v_cache_count'), 10) * pagesize;
 
                 result.total = parseInt(util.getValue(lines, 'hw.realmem'), 10);
-                if (isNaN(result.total)) {
+                if (Number.isNaN(result.total)) {
                   result.total = parseInt(util.getValue(lines, 'hw.physmem'), 10);
                 }
                 result.free = parseInt(util.getValue(lines, 'vm.stats.vm.v_free_count'), 10) * pagesize;
@@ -304,7 +304,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
             const lines = stdout
               .split('\r\n')
               .filter((line: any) => line.trim() !== '')
-              .filter((line: any, idx: any) => idx > 0);
+              .filter((_line: any, idx: any) => idx > 0);
             lines.forEach((line: any) => {
               if (line !== '') {
                 const parts = line.trim().split(/\s\s+/);
@@ -478,7 +478,7 @@ export function memLayout(callback?: Callback<MemLayoutData[]>): Promise<MemLayo
             devices.forEach((device) => {
               const lines = device.split('\n');
               const bank = (hasBank ? 'BANK ' : 'DIMM') + lines[0].trim().split('/')[0];
-              const size = parseInt(util.getValue(lines, '          Size'));
+              const size = parseInt(util.getValue(lines, '          Size'), 10);
               if (size) {
                 result.push({
                   size: size * 1024 * 1024 * 1024,
@@ -514,7 +514,7 @@ export function memLayout(callback?: Callback<MemLayoutData[]>): Promise<MemLayo
           }
           if (!result.length) {
             const lines = stdout.toString().split('\n');
-            const size = parseInt(util.getValue(lines, '      Memory:'));
+            const size = parseInt(util.getValue(lines, '      Memory:'), 10);
             const type = util.getValue(lines, '      Type:');
             const manufacturerId = util.getValue(lines, '      Manufacturer:');
             if (size && type) {

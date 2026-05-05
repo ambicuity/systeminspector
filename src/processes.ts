@@ -84,12 +84,12 @@ function parseElapsedTime(etime: any) {
   const elapsed = etime.split('-');
 
   const timeIndex = elapsed.length - 1;
-  const days = timeIndex > 0 ? parseInt(elapsed[timeIndex - 1]) : 0;
+  const days = timeIndex > 0 ? parseInt(elapsed[timeIndex - 1], 10) : 0;
 
   const timeStr = elapsed[timeIndex].split(':');
-  const hours = timeStr.length === 3 ? parseInt(timeStr[0] || 0) : 0;
-  const mins = parseInt(timeStr[timeStr.length === 3 ? 1 : 0] || 0);
-  const secs = parseInt(timeStr[timeStr.length === 3 ? 2 : 1] || 0);
+  const hours = timeStr.length === 3 ? parseInt(timeStr[0] || 0, 10) : 0;
+  const mins = parseInt(timeStr[timeStr.length === 3 ? 1 : 0] || 0, 10);
+  const secs = parseInt(timeStr[timeStr.length === 3 ? 2 : 1] || 0, 10);
   const ms = (((days * 24 + hours) * 60 + mins) * 60 + secs) * 1000;
 
   let res = new Date(current.getTime());
@@ -97,7 +97,7 @@ function parseElapsedTime(etime: any) {
   try {
     res = new Date(current.getTime() - ms);
     result = res.toISOString().substring(0, 10) + ' ' + res.toISOString().substring(11, 19);
-  } catch (e) {
+  } catch (_e) {
     util.noop();
   }
   return result;
@@ -159,7 +159,7 @@ function services(srv: any, callback: any) {
                 }
               }
               srvString = srvs.join('|');
-            } catch (d) {
+            } catch (_d) {
               try {
                 srvString = '';
                 const tmpsrv = execSync('service --status-all 2> /dev/null', util.execOptsLinux).toString().split('\n');
@@ -170,7 +170,7 @@ function services(srv: any, callback: any) {
                   }
                 }
                 srvs = srvString.split('|');
-              } catch (e) {
+              } catch (_e) {
                 try {
                   const srvStr = execSync('ls /etc/init.d/ -m 2> /dev/null', util.execOptsLinux).toString().split('\n').join('');
                   srvString = '';
@@ -184,7 +184,7 @@ function services(srv: any, callback: any) {
                     }
                     srvs = srvString.split('|');
                   }
-                } catch (f) {
+                } catch (_f) {
                   srvString = '';
                   srvs = [];
                 }
@@ -248,7 +248,7 @@ function services(srv: any, callback: any) {
                       cmd += ';cat /proc/' + result[i].pids[j] + '/stat';
                     }
                   }
-                  exec(cmd, { maxBuffer: 1024 * 102400 }, (error: any, stdout: any) => {
+                  exec(cmd, { maxBuffer: 1024 * 102400 }, (_error: any, stdout: any) => {
                     const curr_processes = stdout.toString().split('\n');
 
                     // first line (all - /proc/stat)
@@ -264,8 +264,8 @@ function services(srv: any, callback: any) {
                         let listPos = -1;
                         for (const i in result) {
                           for (const j in result[i].pids) {
-                            if (parseInt(result[i].pids[j]) === parseInt(resultProcess.pid as any)) {
-                              listPos = parseInt(i);
+                            if (parseInt(result[i].pids[j], 10) === parseInt(resultProcess.pid as any, 10)) {
+                              listPos = parseInt(i, 10);
                             }
                           }
                         }
@@ -436,16 +436,16 @@ function services(srv: any, callback: any) {
 
 function parseProcStat(line: any) {
   const parts = line.replace(/ +/g, ' ').split(' ');
-  const user = parts.length >= 2 ? parseInt(parts[1]) : 0;
-  const nice = parts.length >= 3 ? parseInt(parts[2]) : 0;
-  const system = parts.length >= 4 ? parseInt(parts[3]) : 0;
-  const idle = parts.length >= 5 ? parseInt(parts[4]) : 0;
-  const iowait = parts.length >= 6 ? parseInt(parts[5]) : 0;
-  const irq = parts.length >= 7 ? parseInt(parts[6]) : 0;
-  const softirq = parts.length >= 8 ? parseInt(parts[7]) : 0;
-  const steal = parts.length >= 9 ? parseInt(parts[8]) : 0;
-  const guest = parts.length >= 10 ? parseInt(parts[9]) : 0;
-  const guest_nice = parts.length >= 11 ? parseInt(parts[10]) : 0;
+  const user = parts.length >= 2 ? parseInt(parts[1], 10) : 0;
+  const nice = parts.length >= 3 ? parseInt(parts[2], 10) : 0;
+  const system = parts.length >= 4 ? parseInt(parts[3], 10) : 0;
+  const idle = parts.length >= 5 ? parseInt(parts[4], 10) : 0;
+  const iowait = parts.length >= 6 ? parseInt(parts[5], 10) : 0;
+  const irq = parts.length >= 7 ? parseInt(parts[6], 10) : 0;
+  const softirq = parts.length >= 8 ? parseInt(parts[7], 10) : 0;
+  const steal = parts.length >= 9 ? parseInt(parts[8], 10) : 0;
+  const guest = parts.length >= 10 ? parseInt(parts[9], 10) : 0;
+  const guest_nice = parts.length >= 11 ? parseInt(parts[10], 10) : 0;
   return user + nice + system + idle + iowait + irq + softirq + steal + guest + guest_nice;
 }
 
@@ -454,11 +454,11 @@ function calcProcStatLinux(line: any, all: any, _cpu_old: any) {
   if (statparts.length >= 2) {
     const parts = statparts[1].split(' ');
     if (parts.length >= 16) {
-      const pid = parseInt(statparts[0].split(' ')[0]);
-      const utime = parseInt(parts[12]);
-      const stime = parseInt(parts[13]);
-      const cutime = parseInt(parts[14]);
-      const cstime = parseInt(parts[15]);
+      const pid = parseInt(statparts[0].split(' ')[0], 10);
+      const utime = parseInt(parts[12], 10);
+      const stime = parseInt(parts[13], 10);
+      const cutime = parseInt(parts[14], 10);
+      const cstime = parseInt(parts[15], 10);
 
       // calc
       let cpuu = 0;
@@ -537,7 +537,7 @@ function processes(callback: any) {
     }
     if (result.substr(0, 1) !== '[') {
       const parts = result.split('/');
-      if (isNaN(parseInt(parts[parts.length - 1]))) {
+      if (Number.isNaN(parseInt(parts[parts.length - 1], 10))) {
         result = parts[parts.length - 1];
       } else {
         result = parts[0];
@@ -560,21 +560,21 @@ function processes(callback: any) {
     }
 
     checkColumn(0);
-    const pid = parseInt(line.substring(parsedhead[0].from + offset, parsedhead[0].to + offset2));
+    const pid = parseInt(line.substring(parsedhead[0].from + offset, parsedhead[0].to + offset2), 10);
     checkColumn(1);
-    const ppid = parseInt(line.substring(parsedhead[1].from + offset, parsedhead[1].to + offset2));
+    const ppid = parseInt(line.substring(parsedhead[1].from + offset, parsedhead[1].to + offset2), 10);
     checkColumn(2);
     const cpu = parseFloat(line.substring(parsedhead[2].from + offset, parsedhead[2].to + offset2).replace(/,/g, '.'));
     checkColumn(3);
     const mem = parseFloat(line.substring(parsedhead[3].from + offset, parsedhead[3].to + offset2).replace(/,/g, '.'));
     checkColumn(4);
-    const priority = parseInt(line.substring(parsedhead[4].from + offset, parsedhead[4].to + offset2));
+    const priority = parseInt(line.substring(parsedhead[4].from + offset, parsedhead[4].to + offset2), 10);
     checkColumn(5);
-    const vsz = parseInt(line.substring(parsedhead[5].from + offset, parsedhead[5].to + offset2));
+    const vsz = parseInt(line.substring(parsedhead[5].from + offset, parsedhead[5].to + offset2), 10);
     checkColumn(6);
-    const rss = parseInt(line.substring(parsedhead[6].from + offset, parsedhead[6].to + offset2));
+    const rss = parseInt(line.substring(parsedhead[6].from + offset, parsedhead[6].to + offset2), 10);
     checkColumn(7);
-    const nice = parseInt(line.substring(parsedhead[7].from + offset, parsedhead[7].to + offset2)) || 0;
+    const nice = parseInt(line.substring(parsedhead[7].from + offset, parsedhead[7].to + offset2), 10) || 0;
     checkColumn(8);
     const started = !_sunos
       ? parseElapsedTime(line.substring(parsedhead[8].from + offset, parsedhead[8].to + offset2).trim())
@@ -727,21 +727,21 @@ function processes(callback: any) {
         line = line.trim().replace(/ +/g, ' ').replace(/,+/g, '.');
         const parts = line.split(' ');
         const command = parts.slice(9).join(' ');
-        const pmem = parseFloat(((1.0 * parseInt(parts[3]) * 1024) / os.totalmem()).toFixed(1));
+        const pmem = parseFloat(((1.0 * parseInt(parts[3], 10) * 1024) / os.totalmem()).toFixed(1));
         const started = parseElapsed(parts[5]);
 
         result.push({
-          pid: parseInt(parts[0]),
-          parentPid: parseInt(parts[1]),
+          pid: parseInt(parts[0], 10),
+          parentPid: parseInt(parts[1], 10),
           name: getName(command),
           cpu: 0,
           cpuu: 0,
           cpus: 0,
           mem: pmem,
           priority: 0,
-          memVsz: parseInt(parts[2]),
-          memRss: parseInt(parts[3]),
-          nice: parseInt(parts[4]),
+          memVsz: parseInt(parts[2], 10),
+          memRss: parseInt(parts[3], 10),
+          nice: parseInt(parts[4], 10),
           started: started,
           state:
             parts[6] === 'R'
@@ -816,7 +816,7 @@ function processes(callback: any) {
                   result.list.forEach((element) => {
                     cmd += ';cat /proc/' + element.pid + '/stat';
                   });
-                  exec(cmd, { maxBuffer: 1024 * 102400 }, (error: any, stdout: any) => {
+                  exec(cmd, { maxBuffer: 1024 * 102400 }, (_error: any, stdout: any) => {
                     const curr_processes = stdout.toString().split('\n');
 
                     // first line (all - /proc/stat)
@@ -1248,8 +1248,8 @@ function processLoad(proc: any, callback: any) {
                   const name = _linux ? linuxName : data[4].substring(data[4].lastIndexOf('/') + 1);
                   procStats.push({
                     name,
-                    pid: parseInt(data[0]) || 0,
-                    ppid: parseInt(data[1]) || 0,
+                    pid: parseInt(data[0], 10) || 0,
+                    ppid: parseInt(data[1], 10) || 0,
                     cpu: parseFloat(data[2].replace(',', '.')),
                     mem: parseFloat(data[3].replace(',', '.'))
                   });
@@ -1323,7 +1323,7 @@ function processLoad(proc: any, callback: any) {
                     cmd += ';cat /proc/' + result[i].pids[j] + '/stat';
                   }
                 }
-                exec(cmd, { maxBuffer: 1024 * 102400 }, (error: any, stdout: any) => {
+                exec(cmd, { maxBuffer: 1024 * 102400 }, (_error: any, stdout: any) => {
                   const curr_processes = stdout.toString().split('\n');
 
                   // first line (all - /proc/stat)
@@ -1340,7 +1340,7 @@ function processLoad(proc: any, callback: any) {
                       let resultItemId = -1;
                       for (const i in result) {
                         if (result[i].pids.indexOf(resultProcess.pid) >= 0) {
-                          resultItemId = parseInt(i);
+                          resultItemId = parseInt(i, 10);
                         }
                       }
                       // store pcpu in outer result

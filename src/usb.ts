@@ -194,7 +194,7 @@ function parseDarwinUsb(usb: string, id?: number): Partial<UsbData> | null {
     } else {
       return null;
     }
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }

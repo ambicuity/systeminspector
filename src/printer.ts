@@ -135,7 +135,7 @@ export function printer(callback?: Callback<PrinterData[] | null>): Promise<Prin
             if (_linux) {
               cmd = 'export LC_ALL=C; lpstat -lp 2>/dev/null; unset LC_ALL';
               // lpstat
-              exec(cmd, (error, stdout) => {
+              exec(cmd, (_error, stdout) => {
                 const parts = ('\n' + stdout.toString()).split('\nprinter ');
                 for (let i = 1; i < parts.length; i++) {
                   const printers = parseLinuxLpstatPrinter(parts[i].split('\n'), i);

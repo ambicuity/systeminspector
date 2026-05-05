@@ -1308,7 +1308,7 @@ function diskLayout(callback: any) {
                 });
                 if (cmd) {
                   cmd = cmd + 'printf "\n"';
-                  exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+                  exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                     const lines = stdout.toString().split('\n');
                     lines.forEach((line: any) => {
                       if (line) {
@@ -1562,7 +1562,7 @@ function diskLayout(callback: any) {
                     }
                   });
                   commitResult(result);
-                } catch (e) {
+                } catch (_e) {
                   util.pushDiagnostic({
                     feature: 'diskLayout',
                     dependency: 'smartmontools',
@@ -1573,7 +1573,7 @@ function diskLayout(callback: any) {
                   });
                   if (cmd) {
                     cmd = cmd + 'printf "\n"';
-                    exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+                    exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                       const lines = stdout.toString().split('\n');
                       lines.forEach((line: any) => {
                         if (line) {
@@ -1603,7 +1603,7 @@ function diskLayout(callback: any) {
               });
             } else if (cmd) {
               cmd = cmd + 'printf "\n"';
-              exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+              exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                 const lines = stdout.toString().split('\n');
                 lines.forEach((line: any) => {
                   if (line) {
