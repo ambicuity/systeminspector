@@ -183,3 +183,107 @@ export function parseDfDarwin(input: string): ParsedDfRowDarwin[] {
   }
   return rows;
 }
+
+export interface ParsedIfconfigDarwin {
+  iface: string;
+  flags: string[];
+  mtu: number;
+  mac?: string;
+  ip4?: string;
+  ip4Netmask?: string;
+  ip4Broadcast?: string;
+  ip6?: string[];
+  status?: 'active' | 'inactive' | 'unknown';
+}
+
+/**
+ * Parse a single-interface `ifconfig <iface>` output (macOS / BSD format).
+ *
+ * Header line shape:
+ *   en0: flags=8863<UP,BROADCAST,SMART,...> mtu 1500
+ *
+ * Followed by tab-indented lines:
+ *   ether aa:bb:cc:dd:ee:ff
+ *   inet 192.168.1.10 netmask 0xffffff00 broadcast 192.168.1.255
+ *   inet6 fe80::1%en0 prefixlen 64 ...
+ *   status: active
+ */
+export function parseIfconfigDarwin(input: string): ParsedIfconfigDarwin | null {
+  const lines = input.split(/\r?\n/);
+  const headerMatch = /^(\S+?):\s+flags=\d+<([^>]*)>(?:\s+mtu\s+(\d+))?/.exec(lines[0] || '');
+  if (!headerMatch) return null;
+  const result: ParsedIfconfigDarwin = {
+    iface: headerMatch[1],
+    flags: headerMatch[2] ? headerMatch[2].split(',').filter(Boolean) : [],
+    mtu: Number.parseInt(headerMatch[3] || '0', 10) || 0,
+    ip6: []
+  };
+  for (const raw of lines.slice(1)) {
+    const line = raw.trim();
+    let m: RegExpExecArray | null;
+    if ((m = /^ether\s+([0-9a-f:]{17})/i.exec(line))) {
+      result.mac = m[1];
+    } else if ((m = /^inet\s+(\d{1,3}(?:\.\d{1,3}){3})(?:\s+netmask\s+(\S+))?(?:\s+broadcast\s+(\S+))?/.exec(line))) {
+      result.ip4 = m[1];
+      if (m[2]) result.ip4Netmask = m[2];
+      if (m[3]) result.ip4Broadcast = m[3];
+    } else if ((m = /^inet6\s+([0-9a-f:]+(?:%\S+)?)/i.exec(line))) {
+      result.ip6!.push(m[1]);
+    } else if ((m = /^status:\s+(\S+)/.exec(line))) {
+      result.status = m[1] === 'active' || m[1] === 'inactive' ? (m[1] as 'active' | 'inactive') : 'unknown';
+    }
+  }
+  if (!result.ip6!.length) delete result.ip6;
+  return result;
+}
+
+export interface ParsedRouteDarwin {
+  destination: string;
+  gateway: string;
+  iface: string;
+  flags?: string[];
+}
+
+/**
+ * Parse `route -n get default` output (macOS).
+ *
+ * Format is a label/value table:
+ *   destination: default
+ *      gateway: 192.168.1.1
+ *    interface: en0
+ *        flags: <UP,GATEWAY,DONE,STATIC,...>
+ */
+export function parseRouteDarwin(input: string): ParsedRouteDarwin | null {
+  const values = parseKeyValueLines(input);
+  if (!values.destination || !values.gateway || !values.interface) return null;
+  const flagsMatch = /<([^>]*)>/.exec(values.flags || '');
+  return {
+    destination: values.destination,
+    gateway: values.gateway,
+    iface: values.interface,
+    flags: flagsMatch ? flagsMatch[1].split(',').filter(Boolean) : []
+  };
+}
+
+/**
+ * Count routing-table rows in `netstat -rn` output. (Distinct from
+ * parseNetstatConnections which counts established TCP/UDP sockets.)
+ */
+export function parseNetstatRoutes(input: string): number {
+  let count = 0;
+  let inTable = false;
+  for (const raw of input.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (/^Destination\s+Gateway/.test(line)) {
+      inTable = true;
+      continue;
+    }
+    if (!inTable) continue;
+    if (!line) {
+      inTable = false;
+      continue;
+    }
+    count++;
+  }
+  return count;
+}
