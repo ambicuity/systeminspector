@@ -17,6 +17,102 @@ export type MaybeUnsupported<T> = T | null;
 
 export type SelectorString = string;
 export type ObserveHandle = NodeJS.Timeout;
+export type Confidence = 'high' | 'medium' | 'low';
+export type DiagnosticSeverity = 'info' | 'warning' | 'error';
+
+export interface RedactionOptions {
+  serialNumbers?: boolean;
+  macAddresses?: boolean;
+  usernames?: boolean;
+  ipAddresses?: boolean;
+  uuids?: boolean;
+  processArgs?: boolean;
+}
+
+export interface InspectOptions {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+  envelope?: false;
+  redact?: RedactionOptions | boolean;
+  policy?: 'default' | 'hardened';
+  disableRiskyProbes?: boolean;
+}
+
+export interface InspectEnvelopeOptions extends Omit<InspectOptions, 'envelope'> {
+  envelope: true;
+}
+
+export interface InspectEnvelope<T> {
+  schemaVersion: string;
+  data: T;
+  diagnostics: DiagnosticRecord[];
+  durationMs: number;
+  source?: string;
+  platform: NodeJS.Platform;
+  confidence: Confidence;
+}
+
+export interface CapabilityRecord {
+  function: PublicFunctionName;
+  supported: boolean;
+  platform: NodeJS.Platform;
+  requiredTools: string[];
+  availableTools: string[];
+  permissionsRequired: boolean;
+  confidence: Confidence;
+  notes?: string;
+}
+
+export interface DiagnosticRecord {
+  id: string;
+  functionName: string;
+  module: string;
+  platform: NodeJS.Platform | string;
+  command?: string;
+  severity: DiagnosticSeverity;
+  code: string;
+  issue:
+    | 'missing_tool'
+    | 'insufficient_privileges'
+    | 'unsupported_hardware'
+    | 'parse_error'
+    | 'command_timeout'
+    | 'encoding_error'
+    | 'command_error'
+    | 'missing_optional_package'
+    | 'version_unsupported';
+  message: string;
+  cause?: string;
+  timestamp: string | number;
+  durationMs?: number;
+  dependency?: string;
+  feature: string;
+  stderr?: string;
+  recommendedFix?: string;
+}
+
+export interface DiagnosticsOptions {
+  sinceLastCall?: boolean;
+}
+
+export interface WatchOptions {
+  intervalMs?: number;
+  changedOnly?: boolean;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+export type GetResult<T extends GetValueObject> = Record<keyof T, unknown>;
+
+export interface JsonSchema {
+  $schema: string;
+  $id?: string;
+  title: string;
+  type: string;
+  properties?: Record<string, unknown>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
 
 export type PublicFunctionName =
   | 'version'
@@ -77,6 +173,13 @@ export type PublicFunctionName =
   | 'getAllData';
 
 export type GetValueObject = Partial<Record<PublicFunctionName, SelectorString>>;
+
+export interface SelectorBuilder {
+  fields(...names: string[]): SelectorBuilder;
+  filter(name: string, value: string | number): SelectorBuilder;
+  all(): SelectorBuilder;
+  toString(): SelectorString;
+}
 
 // 1. General
 
@@ -605,26 +708,7 @@ export interface NetworkStatsData {
   ms: number;
 }
 
-export interface DiagnosticData {
-  feature: string;
-  platform: string;
-  command?: string;
-  dependency?: string;
-  issue:
-    | 'missing_tool'
-    | 'insufficient_privileges'
-    | 'unsupported_hardware'
-    | 'parse_error'
-    | 'command_timeout'
-    | 'encoding_error'
-    | 'command_error'
-    | 'missing_optional_package'
-    | 'version_unsupported';
-  message: string;
-  stderr?: string;
-  recommendedFix?: string;
-  timestamp: number;
-}
+export type DiagnosticData = DiagnosticRecord;
 
 export interface NetworkConnectionsData {
   protocol: string;

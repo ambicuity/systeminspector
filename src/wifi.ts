@@ -149,13 +149,13 @@ const _wifi_frequencies: Record<string, number> = {
 };
 
 function wifiFrequencyFromChannel(channel: string | number | null): number | null {
-  return {}.hasOwnProperty.call(_wifi_frequencies, String(channel)) ? _wifi_frequencies[channel as keyof typeof _wifi_frequencies] : null;
+  return  Object.hasOwn(_wifi_frequencies, String(channel)) ? _wifi_frequencies[channel as keyof typeof _wifi_frequencies] : null;
 }
 
 function wifiChannelFromFrequencs(frequency: number): number {
   let channel = 0;
-  for (let key in _wifi_frequencies) {
-    if ({}.hasOwnProperty.call(_wifi_frequencies, key)) {
+  for (const key in _wifi_frequencies) {
+    if (Object.hasOwn(_wifi_frequencies, key)) {
       if (_wifi_frequencies[key] === frequency) {
         channel = util.toInt(key);
       }
@@ -312,7 +312,7 @@ function getWifiNetworkListNmi(): WifiNetworkData[] {
 function getWifiNetworkListIw(iface: string): WifiNetworkData[] | -1 {
   const result: WifiNetworkData[] = [];
   try {
-    let iwlistParts = execSync(`export LC_ALL=C; iwlist ${iface} scan 2>&1; unset LC_ALL`, util.execOptsLinux).toString().split('        Cell ');
+    const iwlistParts = execSync(`export LC_ALL=C; iwlist ${iface} scan 2>&1; unset LC_ALL`, util.execOptsLinux).toString().split('        Cell ');
     if (iwlistParts[0].indexOf('resource busy') >= 0) {
       return -1;
     }
@@ -419,7 +419,7 @@ function parseWifiDarwin(wifiStr: string): WifiNetworkData[] {
       } else if (sm.startsWith('pairport_security_mode_wpa3')) {
         security.push('WPA3');
       }
-      const channel = parseInt(('' + wifiItem.spairport_network_channel).split(' ')[0]) || 0;
+      const channel = parseInt(('' + wifiItem.spairport_network_channel).split(' ')[0], 10) || 0;
       const signalLevel = wifiItem.spairport_signal_noise || null;
 
       result.push({
@@ -506,7 +506,7 @@ export function wifiNetworks(callback?: Callback<WifiNetworkData[]>): Promise<Wi
         }
       } else if (_darwin) {
         const cmd = 'system_profiler SPAirPortDataType -json 2>/dev/null';
-        exec(cmd, { maxBuffer: 1024 * 40000 }, (error, stdout) => {
+        exec(cmd, { maxBuffer: 1024 * 40000 }, (_error, stdout) => {
           result = parseWifiDarwin(stdout.toString());
           if (callback) {
             callback(result);
@@ -597,7 +597,7 @@ function getVendor(model: string): string {
   return result;
 }
 
-function formatBssid(s: string): string {
+function _formatBssid(s: string): string {
   const parts =
     s
       .replace(/</g, '')
@@ -665,7 +665,7 @@ export function wifiConnections(callback?: Callback<WifiConnectionData[]>): Prom
         resolve(result);
       } else if (_darwin) {
         const cmd = 'system_profiler SPNetworkDataType SPAirPortDataType -xml 2>/dev/null; echo "######" ; ioreg -n AppleBCMWLANSkywalkInterface -r 2>/dev/null';
-        exec(cmd, (error, stdout) => {
+        exec(cmd, (_error, stdout) => {
           try {
             const parts = stdout.toString().split('######');
             const profilerObj = util.plistParser(parts[0]);
@@ -674,9 +674,9 @@ export function wifiConnections(callback?: Callback<WifiConnectionData[]>): Prom
               profilerObj[0]._SPCommandLineArguments.indexOf('SPAirPortDataType') >= 0 ? profilerObj[0]._items[0].spairport_airport_interfaces : profilerObj[1]._items[0].spairport_airport_interfaces;
 
             // parts[1] : ioreg
-            let lines3: string[] = [];
+            let _lines3: string[] = [];
             if (parts[1].indexOf('  | {') > 0 && parts[1].indexOf('  | }') > parts[1].indexOf('  | {')) {
-              lines3 = parts[1].split('  | {')[1].split('  | }')[0].replace(/ \| /g, '').replace(/"/g, '').split('\n');
+              _lines3 = parts[1].split('  | {')[1].split('  | }')[0].replace(/ \| /g, '').replace(/"/g, '').split('\n');
             }
 
             const networkWifiObj = networkObj.find((item: any) => {
@@ -803,7 +803,7 @@ export function wifiInterfaces(callback?: Callback<WifiInterfaceData[]>): Promis
         resolve(result);
       } else if (_darwin) {
         const cmd = 'system_profiler SPNetworkDataType';
-        exec(cmd, (error, stdout) => {
+        exec(cmd, (_error, stdout) => {
           const parts1 = stdout.toString().split('\n\n    Wi-Fi:\n\n');
           if (parts1.length > 1) {
             const lines = parts1[1].split('\n\n')[0].split('\n');

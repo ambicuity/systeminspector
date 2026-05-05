@@ -1,7 +1,7 @@
 import * as readline from 'node:readline';
 import { inspect } from 'node:util';
 import * as si from './index';
-import * as pkg from '../package.json';
+import { VERSION as libVersion } from './version.generated';
 
 type MenuItem = [string, string];
 type MenuGroup = {
@@ -12,7 +12,6 @@ type TerminalState = 'idle' | 'running' | 'success' | 'error' | 'warning';
 type CommandResult = { data: unknown; title: string } | 'not_supported' | 'no_key';
 type Command = { key: string; label: string };
 
-const libVersion = pkg.version;
 const MIN_WIDTH = 78;
 const MAX_WIDTH = 118;
 

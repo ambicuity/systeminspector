@@ -33,12 +33,42 @@ The first two functions just give back systeminspector library version number an
 
 Diagnostics are non-breaking records for missing tools, permission issues, unsupported hardware, parse failures, command timeouts, encoding issues, and optional package loading failures.
 
-Each diagnostic record can include feature, platform, command, dependency, issue, message, stderr, recommendedFix, and timestamp.
+Each diagnostic record can include id, functionName, module, platform, command, severity, code, issue, message, cause, durationMs, dependency, stderr, recommendedFix, and timestamp.
 
 | Function | Result object | Linux | BSD | Mac | Win | Sun | Comments |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | si.diagnostics() | : DiagnosticData\ | X | X | X | X | X | return collected diagnostic records |
+| si.diagnostics({ sinceLastCall: true }) | : DiagnosticData\ | X | X | X | X | X | drain records since previous diagnostic read |
 | si.clearDiagnostics() | : void | X | X | X | X | X | clear collected diagnostic records |
+| si.onDiagnostic(cb) | : () => void | X | X | X | X | X | subscribe to new diagnostic records |
+
+## Capabilities, Schemas, and Envelopes
+
+Capability metadata explains whether a function is supported, which optional tools are required, which tools were detected, and whether permissions may be needed.
+
+| Function | Result object | Linux | BSD | Mac | Win | Sun | Comments |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| si.capabilities() | CapabilityRecord[] | X | X | X | X | X | all function capability records |
+| si.capability(name) | CapabilityRecord | X | X | X | X | X | one function capability record |
+| si.schemaVersion() | string | X | X | X | X | X | current normalized schema version |
+| si.getSchema(name) | JsonSchema | X | X | X | X | X | JSON schema metadata |
+
+Existing API calls keep their default return shapes. Some functions also accept options and an envelope mode:
+
+```js
+const cpu = await si.cpu({ timeoutMs: 3000 });
+
+const detailed = await si.cpu({
+  envelope: true,
+  timeoutMs: 3000,
+  redact: true
+});
+
+console.log(detailed.data);
+console.log(detailed.diagnostics);
+```
+
+Schema compatibility contract: `schemaVersion()` changes for additive/breaking schema-catalog updates. Consumers should pin and validate expected keys in CI.
 
 ## Advanced Windows PowerShell Helpers
 
@@ -64,6 +94,19 @@ Specify return object for all
 values that should be returned: |
 
 The key names of the valueObject must be exactly the same as the representing function within systeminspector.
+
+You can build selectors in typed-friendly code:
+
+```js
+const fields = si.select().fields('manufacturer', 'cores').toString();
+const data = await si.get({ cpu: fields });
+```
+
+Add simple filters with `filter()`:
+
+```js
+const nicSelector = si.select().fields('iface', 'ip4').filter('iface', 'en0').toString();
+```
 
 ### Providing parameters to the get() function
 
@@ -110,6 +153,11 @@ Pass "\*" for ALL network interfaces |
 As not all funtions are supported in each operating system the result object might be different in each OS.
 
 **ATTENTION**: Use this only if you really need ALL information. Especially on Windows this can take a long time because the underlying PowerShell CIM providers can be slow when used for the first time.
+
+## Privacy-Safe Support Report
+
+Use `systeminspector support-report --redact` to generate a support bundle with diagnostics, capability metadata, and an envelope snapshot.  
+By default, the command redacts sensitive fields. Use `--no-redact` only in trusted local debugging workflows.
 
 ## Examples
 
@@ -215,4 +263,3 @@ si.get(valueObject).then(data => console.log(data));
   ]
 }
 ```
-

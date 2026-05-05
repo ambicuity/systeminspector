@@ -60,6 +60,8 @@ export default defineConfig({
           { text: 'Docker', link: '/docker' },
           { text: 'VirtualBox', link: '/vbox' },
           { text: 'Stats Functions', link: '/statsfunctions' },
+          { text: 'Platform Support', link: '/platform-support' },
+          { text: 'Strategic Audit', link: '/audit-roadmap' },
           { text: 'Testing', link: '/tests' },
           { text: 'Known Issues', link: '/issues' },
           { text: 'FAQ & Troubleshooting', link: '/faq' },

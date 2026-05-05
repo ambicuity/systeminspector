@@ -16,7 +16,7 @@ type TerminalState = 'idle' | 'running' | 'success' | 'error' | 'warning';
 let waiting = false;
 let timer: any;
 let runStartedAt = 0;
-let activeCommand: { key: string; label: string } | null = null;
+let _activeCommand: { key: string; label: string } | null = null;
 
 const MIN_WIDTH = 78;
 const MAX_WIDTH = 118;
@@ -183,7 +183,7 @@ function padVisible(input: string, width: number) {
   return input + ' '.repeat(Math.max(width - visibleLength(input), 0));
 }
 
-function center(input: string, width: number) {
+function _center(input: string, width: number) {
   const gap = Math.max(width - visibleLength(input), 0);
   const left = Math.floor(gap / 2);
   const right = gap - left;
@@ -326,7 +326,7 @@ function stopRunningIndicator() {
 
 function startRun(command: { key: string; label: string }) {
   waiting = true;
-  activeCommand = command;
+  _activeCommand = command;
   runStartedAt = Date.now();
   startRunningIndicator(command);
 }
@@ -415,7 +415,7 @@ process.stdin.on('keypress', (key, data) => {
           } else {
             renderState('No output captured', [`Key: ${sanitizedKey}`, 'The command completed without terminal output.'], 'warning', duration);
           }
-        } catch (e) {
+        } catch (_e) {
           renderState('Command output error', [`Key: ${sanitizedKey}`, 'Raw output follows.'], 'error', duration);
           renderOutputBlock(stdout.toString());
         }

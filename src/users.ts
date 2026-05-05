@@ -261,15 +261,15 @@ export function users(callback?: Callback<UserData[]>): Promise<UserData[]> {
               const loggedons = parseWinLoggedOn((data[1] || '').split(/\n\s*\n/));
               const queryUser = parseWinUsersQuery((data[3] || '').split('\r\n'));
               const users = parseWinUsers((data[2] || '').split(/\n\s*\n/), queryUser);
-              for (let id in loggedons) {
-                if ({}.hasOwnProperty.call(loggedons, id)) {
-                  loggedons[id].dateTime = {}.hasOwnProperty.call(sessions, id) ? sessions[id] : '';
+              for (const id in loggedons) {
+                if (Object.hasOwn(loggedons, id)) {
+                  loggedons[id].dateTime = Object.hasOwn(sessions, id) ? sessions[id] : '';
                 }
               }
               users.forEach((user) => {
                 let dateTime = '';
-                for (let id in loggedons) {
-                  if ({}.hasOwnProperty.call(loggedons, id)) {
+                for (const id in loggedons) {
+                  if (Object.hasOwn(loggedons, id)) {
                     if (loggedons[id].user === user.user && (!dateTime || dateTime < loggedons[id].dateTime)) {
                       dateTime = loggedons[id].dateTime;
                     }
@@ -379,7 +379,7 @@ function parseWinLoggedOn(loggedonParts: any) {
 
 function parseWinUsersQuery(lines: any) {
   lines = lines.filter((item: any) => item);
-  let result: any[] = [];
+  const result: any[] = [];
   const header = lines[0];
   const headerDelimiter: any[] = [];
   if (header) {

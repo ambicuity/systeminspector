@@ -14,8 +14,23 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawn, exec, execSync, type ExecSyncOptions, type SpawnOptions } from 'child_process';
+import { spawn, exec, execSync, execFile, type ExecSyncOptions, type SpawnOptions } from 'child_process';
 import type { ChildProcess } from 'child_process';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import type { DiagnosticRecord, DiagnosticsOptions, DiagnosticSeverity, InspectOptions } from './types';
+
+const diagnosticContext = new AsyncLocalStorage<{ records: DiagnosticRecord[] }>();
+
+interface CommandSpec {
+  feature: string;
+  command: string;
+  args?: string[];
+  timeoutMs?: number;
+  signal?: AbortSignal;
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+  maxBufferBytes?: number;
+}
 
 const _platform = process.platform;
 const _linux = _platform === 'linux' || _platform === 'android';
@@ -30,12 +45,15 @@ let codepage = '';
 let _smartMonToolsInstalled: boolean | null = null;
 let _smartMonToolsInfo: any = null;
 let _rpi_cpuinfo: string[] | null = null;
-const _diagnostics: any[] = [];
+const _diagnostics: DiagnosticRecord[] = [];
+const _diagnosticListeners: Array<(record: DiagnosticRecord) => void> = [];
+let _diagnosticReadIndex = 0;
 
 const WINDIR = process.env.WINDIR || 'C:\\Windows';
 
 // powerShell
 let _psChild: ChildProcess | null = null;
+let _psExitHooked = false;
 let _psResult = '';
 const _psCmds: Array<{ id: string; cmd: string; callback: (data: string) => void; start: Date }> = [];
 let _psPersistent = false;
@@ -47,7 +65,7 @@ const _psError = '--ERROR--';
 const _psCmdSeperator = '--###ENDCMD###--';
 const _psIdSeperator = '--##ID##--';
 
-const DEFAULT_COMMAND_TIMEOUT = 0;
+const DEFAULT_COMMAND_TIMEOUT = 10000;
 
 const execOptsWin: ExecSyncOptions = {
   windowsHide: true,
@@ -64,7 +82,7 @@ const execOptsLinux: ExecSyncOptions = {
 
 function toInt(value: any) {
   let result = parseInt(value, 10);
-  if (isNaN(result)) {
+  if (Number.isNaN(result)) {
     result = 0;
   }
   return result;
@@ -96,7 +114,7 @@ const stringStartWith = new String().startsWith;
 const mathMin = Math.min;
 
 function isFunction(functionToCheck: any) {
-  let getType: Record<string, any> = {};
+  const getType: Record<string, any> = {};
   return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 
@@ -104,7 +122,7 @@ function unique(obj: any) {
   const uniques: any[] = [];
   const stringify: Record<string, any> = {};
   for (let i = 0; i < obj.length; i++) {
-    let keys = Object.keys(obj[i]);
+    const keys = Object.keys(obj[i]);
     keys.sort((a, b) => {
       return a.localeCompare(b);
     });
@@ -113,7 +131,7 @@ function unique(obj: any) {
       str += JSON.stringify(keys[j]);
       str += JSON.stringify(obj[i][keys[j]]);
     }
-    if (!{}.hasOwnProperty.call(stringify, str)) {
+    if (!Object.hasOwn(stringify, str)) {
       uniques.push(obj[i]);
       stringify[str] = true;
     }
@@ -166,8 +184,8 @@ function getValue(lines: string[], property: string, separator?: string, trimmed
 
 function decodeEscapeSequence(str: any, base: any) {
   base = base || 16;
-  return str.replace(/\\x([0-9A-Fa-f]{2})/g, function () {
-    return String.fromCharCode(parseInt(arguments[1], base));
+  return str.replace(/\\x([0-9A-Fa-f]{2})/g, (_match: string, hex: string) => {
+    return String.fromCharCode(parseInt(hex, base));
   });
 }
 
@@ -202,7 +220,7 @@ function parseTime(t: any, pmDesignator: any) {
     if (parts[2]) {
       parts[1] += parts[2];
     }
-    let isPM =
+    const isPM =
       (parts[1] && parts[1].toLowerCase().indexOf('pm') > -1) ||
       parts[1].toLowerCase().indexOf('p.m.') > -1 ||
       parts[1].toLowerCase().indexOf('p. m.') > -1 ||
@@ -391,23 +409,72 @@ function getPowershellVersion() {
   return _powerShellVersion;
 }
 
+function diagnosticSeverity(issue: string): DiagnosticSeverity {
+  if (issue === 'command_timeout' || issue === 'command_error' || issue === 'parse_error') {
+    return 'error';
+  }
+  if (issue === 'missing_tool' || issue === 'insufficient_privileges' || issue === 'version_unsupported' || issue === 'encoding_error') {
+    return 'warning';
+  }
+  return 'info';
+}
+
 function pushDiagnostic(diagnostic: any) {
-  _diagnostics.push({
+  const issue = diagnostic.issue || diagnostic.code || 'command_error';
+  const feature = diagnostic.feature || diagnostic.functionName || 'unknown';
+  const record: DiagnosticRecord = {
+    id: diagnostic.id || `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 8)}`,
+    functionName: diagnostic.functionName || feature,
+    module: diagnostic.module || feature,
     platform: _platform,
-    timestamp: Date.now(),
+    severity: diagnostic.severity || diagnosticSeverity(issue),
+    code: diagnostic.code || issue,
+    issue,
+    message: diagnostic.message || 'SystemInspector diagnostic',
+    timestamp: diagnostic.timestamp || new Date().toISOString(),
+    feature,
     ...diagnostic
-  });
+  };
+  const ctx = diagnosticContext.getStore();
+  if (ctx) {
+    ctx.records.push(record);
+  }
+  _diagnostics.push(record);
   if (_diagnostics.length > 200) {
     _diagnostics.shift();
+    _diagnosticReadIndex = Math.max(0, _diagnosticReadIndex - 1);
+  }
+  for (const listener of _diagnosticListeners.slice()) {
+    try {
+      listener(record);
+    } catch {
+      noop();
+    }
   }
 }
 
-function diagnostics() {
+function diagnostics(options?: DiagnosticsOptions) {
+  if (options?.sinceLastCall) {
+    const records = _diagnostics.slice(_diagnosticReadIndex);
+    _diagnosticReadIndex = _diagnostics.length;
+    return records;
+  }
   return _diagnostics.slice();
 }
 
 function clearDiagnostics() {
   _diagnostics.length = 0;
+  _diagnosticReadIndex = 0;
+}
+
+function onDiagnostic(listener: (record: DiagnosticRecord) => void): () => void {
+  _diagnosticListeners.push(listener);
+  return () => {
+    const index = _diagnosticListeners.indexOf(listener);
+    if (index >= 0) {
+      _diagnosticListeners.splice(index, 1);
+    }
+  };
 }
 
 function classifyCommandIssue(stderr: string, error?: any) {
@@ -424,13 +491,36 @@ function classifyCommandIssue(stderr: string, error?: any) {
   return 'command_error';
 }
 
+function applyInspectPolicy(options: InspectOptions = {}): InspectOptions {
+  if (options.policy !== 'hardened') {
+    return options;
+  }
+  const redact =
+    options.redact === true || options.redact === undefined
+      ? {
+          serialNumbers: true,
+          macAddresses: true,
+          usernames: true,
+          ipAddresses: true,
+          uuids: true,
+          processArgs: true
+        }
+      : options.redact;
+  return {
+    ...options,
+    timeoutMs: options.timeoutMs && options.timeoutMs > 0 ? Math.min(options.timeoutMs, 8000) : 8000,
+    redact,
+    disableRiskyProbes: options.disableRiskyProbes ?? true
+  };
+}
+
 function getVboxmanage() {
   return _windows ? `"${process.env.VBOX_INSTALL_PATH || process.env.VBOX_MSI_INSTALL_PATH}\\VBoxManage.exe"` : 'vboxmanage';
 }
 
 function powerShellProceedResults(data: any) {
   let id = '';
-  let parts;
+  let parts: string[];
   let res = '';
   // startID
   if (data.indexOf(_psCmdStart) >= 0) {
@@ -485,6 +575,26 @@ function powerShellStart() {
           _psChild.kill();
         }
       });
+      _psChild.unref?.();
+      if (!_psExitHooked) {
+        _psExitHooked = true;
+        const cleanup = () => {
+          try {
+            powerShellRelease();
+          } catch {
+            // best-effort cleanup; nothing to do if it throws
+          }
+        };
+        process.once('exit', cleanup);
+        process.once('SIGINT', () => {
+          cleanup();
+          process.exit(130);
+        });
+        process.once('SIGTERM', () => {
+          cleanup();
+          process.exit(143);
+        });
+      }
     }
   }
 }
@@ -786,6 +896,124 @@ function execSafe(cmd: string, args?: string[], options?: any): Promise<string> 
   });
 }
 
+function withTimeout<T>(label: string, task: Promise<T>, timeoutMs = DEFAULT_COMMAND_TIMEOUT, signal?: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let timer: NodeJS.Timeout | null = null;
+    const finish = (fn: () => void) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
+      signal?.removeEventListener('abort', onAbort);
+      fn();
+    };
+    const onAbort = () => finish(() => reject(signal?.reason instanceof Error ? signal.reason : new Error(`${label} aborted`)));
+    if (signal?.aborted) {
+      onAbort();
+      return;
+    }
+    signal?.addEventListener('abort', onAbort, { once: true });
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        pushDiagnostic({
+          feature: label,
+          issue: 'command_timeout',
+          message: `${label} timed out after ${timeoutMs} ms`
+        });
+        finish(() => reject(new Error(`${label} timed out after ${timeoutMs} ms`)));
+      }, timeoutMs);
+    }
+    task.then((value) => finish(() => resolve(value))).catch((error) => finish(() => reject(error)));
+  });
+}
+
+function runCommand(command: string, args: string[] = [], options: InspectOptions & { feature?: string; cwd?: string; env?: NodeJS.ProcessEnv; maxBufferBytes?: number } = {}): Promise<string> {
+  const policyOptions = applyInspectPolicy(options);
+  const feature = options.feature || command;
+  const timeout = policyOptions.timeoutMs ?? DEFAULT_COMMAND_TIMEOUT;
+  const started = Date.now();
+  return new Promise((resolve) => {
+    const child = execFile(command, args, {
+      cwd: options.cwd,
+      env: options.env || Object.assign({}, process.env, { LANG: 'en_US.UTF-8' }),
+      windowsHide: true,
+      maxBuffer: options.maxBufferBytes || 1024 * 1024 * 10,
+      encoding: 'utf8',
+      timeout
+    }, (error, stdout, stderr) => {
+      if (error) {
+        pushDiagnostic({
+          feature,
+          functionName: feature,
+          module: 'exec',
+          command: [command, ...args].join(' '),
+          issue: error.killed ? 'command_timeout' : classifyCommandIssue(stderr || '', error),
+          message: error.message || 'Command failed',
+          stderr,
+          durationMs: Date.now() - started
+        });
+      }
+      resolve(stdout || '');
+    });
+    if (policyOptions.signal) {
+      if (policyOptions.signal.aborted) {
+        child.kill();
+        resolve('');
+      } else {
+        policyOptions.signal.addEventListener(
+          'abort',
+          () => {
+            child.kill();
+            pushDiagnostic({
+              feature,
+              functionName: feature,
+              module: 'exec',
+              command: [command, ...args].join(' '),
+              issue: 'command_timeout',
+              code: 'command_aborted',
+              message: 'Command aborted',
+              durationMs: Date.now() - started
+            });
+            resolve('');
+          },
+          { once: true }
+        );
+      }
+    }
+  });
+}
+
+function runCommandSpec(spec: CommandSpec): Promise<string> {
+  return runCommand(spec.command, spec.args || [], {
+    feature: spec.feature,
+    timeoutMs: spec.timeoutMs,
+    signal: spec.signal,
+    cwd: spec.cwd,
+    env: spec.env,
+    maxBufferBytes: spec.maxBufferBytes
+  });
+}
+
+async function readFileSafe(file: string, options: InspectOptions & { encoding?: BufferEncoding; feature?: string } = {}): Promise<string> {
+  const feature = options.feature || 'readFile';
+  try {
+    return await withTimeout(feature, fs.promises.readFile(file, { encoding: options.encoding || 'utf8' }), options.timeoutMs ?? DEFAULT_COMMAND_TIMEOUT, options.signal);
+  } catch (e) {
+    pushDiagnostic({
+      feature,
+      functionName: feature,
+      module: 'filesystem',
+      issue: classifyCommandIssue('', e),
+      message: e instanceof Error ? e.message : `Unable to read ${file}`
+    });
+    return '';
+  }
+}
+
 function getCodepage() {
   if (_windows) {
     if (!codepage) {
@@ -935,7 +1163,7 @@ function execWin(cmd: any, opts: any, callback: any) {
     callback = opts;
     opts = execOptsWin;
   }
-  let newCmd = 'chcp 65001 > nul && cmd /C ' + cmd + ' && chcp ' + codepage + ' > nul';
+  const newCmd = 'chcp 65001 > nul && cmd /C ' + cmd + ' && chcp ' + codepage + ' > nul';
   exec(newCmd, opts, (error, stdout) => {
     callback(error, stdout);
   });
@@ -1306,7 +1534,7 @@ function decodePiCpuinfo(lines?: string[] | string): any {
   const serial = getValue(linesArr, 'serial', ':', true);
 
   let result: Record<string, any> = {};
-  if ({}.hasOwnProperty.call(oldRevisionCodes, revisionCode)) {
+  if (Object.hasOwn(oldRevisionCodes, revisionCode)) {
     // old revision codes
     result = {
       model,
@@ -1330,10 +1558,10 @@ function decodePiCpuinfo(lines?: string[] | string): any {
       model,
       serial,
       revisionCode,
-      memory: 256 * Math.pow(2, memSizeCode),
+      memory: 256 * 2 ** memSizeCode,
       manufacturer,
       processor,
-      type: {}.hasOwnProperty.call(typeList, typeCode) ? typeList[typeCode] : '',
+      type: Object.hasOwn(typeList, typeCode) ? typeList[typeCode] : '',
       revision: '1.' + revision.substr(7, 1)
     };
   }
@@ -1405,8 +1633,8 @@ function promiseAll(promises: Array<Promise<any>>): Promise<{ errors: any[]; res
 }
 
 function promisify(nodeStyleFunction: (...args: any[]) => void): (...args: any[]) => Promise<any> {
-  return () => {
-    const args = Array.prototype.slice.call(arguments);
+  return (...callerArgs: any[]) => {
+    const args = callerArgs.slice();
     return new Promise((resolve, reject) => {
       args.push((err: any, data: any) => {
         if (err) {
@@ -1421,10 +1649,10 @@ function promisify(nodeStyleFunction: (...args: any[]) => void): (...args: any[]
 }
 
 function promisifySave(nodeStyleFunction: (...args: any[]) => void): (...args: any[]) => Promise<any> {
-  return () => {
-    const args = Array.prototype.slice.call(arguments);
+  return (...callerArgs: any[]) => {
+    const args = callerArgs.slice();
     return new Promise((resolve) => {
-      args.push((err: any, data: any) => {
+      args.push((_err: any, data: any) => {
         resolve(data);
       });
       nodeStyleFunction.apply(null, args);
@@ -1449,7 +1677,7 @@ function plistParser(xmlStr: any) {
   const startStr = '<plist version';
 
   let pos = xmlStr.indexOf(startStr);
-  let len = xmlStr.length;
+  const len = xmlStr.length;
   while (xmlStr[pos] !== '>' && pos < len) {
     pos++;
   }
@@ -1458,7 +1686,7 @@ function plistParser(xmlStr: any) {
   let inTagStart = false;
   let inTagContent = false;
   let inTagEnd = false;
-  let metaData: any[] = [{ tagStart: '', tagEnd: '', tagContent: '', key: '', data: null }];
+  const metaData: any[] = [{ tagStart: '', tagEnd: '', tagContent: '', key: '', data: null }];
   let c = '';
   let cn = xmlStr[pos];
 
@@ -1541,7 +1769,7 @@ function plistParser(xmlStr: any) {
                 metaData[depth].data = parseFloat(metaData[depth].tagContent) || 0;
               }
               if (metaData[depth].tagEnd === '/integer' && metaData[depth].tagContent) {
-                metaData[depth].data = parseInt(metaData[depth].tagContent) || 0;
+                metaData[depth].data = parseInt(metaData[depth].tagContent, 10) || 0;
               }
               if (metaData[depth].tagEnd === '/string' && metaData[depth].tagContent) {
                 metaData[depth].data = metaData[depth].tagContent || '';
@@ -1585,7 +1813,7 @@ function plistParser(xmlStr: any) {
 }
 
 function strIsNumeric(str: any) {
-  return typeof str === 'string' && !isNaN(Number(str)) && !isNaN(parseFloat(str));
+  return typeof str === 'string' && !Number.isNaN(Number(str)) && !Number.isNaN(parseFloat(str));
 }
 
 function plistReader(output: any) {
@@ -1621,7 +1849,7 @@ function plistReader(output: any) {
   let obj: Record<string, any> = {};
   try {
     obj = JSON.parse(output);
-  } catch (e) {
+  } catch (_e) {
     noop();
   }
   return obj;
@@ -3000,8 +3228,13 @@ export {
   smartMonToolsInstalled,
   smartMonToolsInfo,
   diagnostics,
+  diagnosticContext,
   clearDiagnostics,
+  onDiagnostic,
   pushDiagnostic,
+  runCommand,
+  readFileSafe,
+  withTimeout,
   linuxVersion,
   plistParser,
   plistReader,
@@ -3022,5 +3255,7 @@ export {
   checkWebsite,
   cleanString,
   getPowershell,
-  getPowershellVersion
+  getPowershellVersion,
+  applyInspectPolicy,
+  runCommandSpec
 };

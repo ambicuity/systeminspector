@@ -114,7 +114,7 @@ function parseWindowsPrinters(lines: string[], id: number): Partial<PrinterData>
 export function printer(callback?: Callback<PrinterData[] | null>): Promise<PrinterData[] | null> {
   return new Promise((resolve) => {
     process.nextTick(() => {
-      let result: any[] = [];
+      const result: any[] = [];
       if (_linux || _freebsd || _openbsd || _netbsd) {
         let cmd = 'cat /etc/cups/printers.conf 2>/dev/null';
         exec(cmd, (error, stdout) => {
@@ -135,7 +135,7 @@ export function printer(callback?: Callback<PrinterData[] | null>): Promise<Prin
             if (_linux) {
               cmd = 'export LC_ALL=C; lpstat -lp 2>/dev/null; unset LC_ALL';
               // lpstat
-              exec(cmd, (error, stdout) => {
+              exec(cmd, (_error, stdout) => {
                 const parts = ('\n' + stdout.toString()).split('\nprinter ');
                 for (let i = 1; i < parts.length; i++) {
                   const printers = parseLinuxLpstatPrinter(parts[i].split('\n'), i);
@@ -161,7 +161,7 @@ export function printer(callback?: Callback<PrinterData[] | null>): Promise<Prin
         });
       }
       if (_darwin) {
-        let cmd = 'system_profiler SPPrintersDataType -json';
+        const cmd = 'system_profiler SPPrintersDataType -json';
         exec(cmd, (error, stdout) => {
           if (!error) {
             try {

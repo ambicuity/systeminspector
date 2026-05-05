@@ -1,0 +1,2 @@
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+abc123         nginx     "nginx"  1h ago    Up 1h     80/tcp    web

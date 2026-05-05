@@ -152,7 +152,7 @@ function graphics(callback: any) {
         const bus = (item.sppci_bus || '').indexOf('builtin') > -1 ? 'Built-In' : (item.sppci_bus || '').indexOf('pcie') > -1 ? 'PCIe' : '';
         const vram = (parseInt(item.spdisplays_vram || '', 10) || 0) * ((item.spdisplays_vram || '').indexOf('GB') > -1 ? 1024 : 1);
         const vramDyn = (parseInt(item.spdisplays_vram_shared || '', 10) || 0) * ((item.spdisplays_vram_shared || '').indexOf('GB') > -1 ? 1024 : 1);
-        let metalVersion = getMetalVersion(item.spdisplays_metal || item.spdisplays_metalfamily || '');
+        const metalVersion = getMetalVersion(item.spdisplays_metal || item.spdisplays_metalfamily || '');
         res.controllers.push({
           vendor: getVendorFromModel(item.spdisplays_vendor || '') || item.spdisplays_vendor || '',
           model: item.sppci_model || '',
@@ -200,13 +200,13 @@ function graphics(callback: any) {
         }
       });
       return res;
-    } catch (e) {
+    } catch (_e) {
       return res;
     }
   }
 
   function parseLinesLinuxControllers(lines: any) {
-    let controllers: any[] = [];
+    const controllers: any[] = [];
     let currentController: any = {
       vendor: '',
       subVendor: '',
@@ -242,9 +242,9 @@ function graphics(callback: any) {
       if ('' !== line.trim()) {
         if (' ' !== line[0] && '\t' !== line[0]) {
           // first line of new entry
-          let isExternal = pciIDs.indexOf(line.split(' ')[0]) >= 0;
+          const isExternal = pciIDs.indexOf(line.split(' ')[0]) >= 0;
           let vgapos = line.toLowerCase().indexOf(' vga ');
-          let _3dcontrollerpos = line.toLowerCase().indexOf('3d controller');
+          const _3dcontrollerpos = line.toLowerCase().indexOf('3d controller');
           if (vgapos !== -1 || _3dcontrollerpos !== -1) {
             // VGA
             if (_3dcontrollerpos !== -1 && vgapos === -1) {
@@ -270,8 +270,8 @@ function graphics(callback: any) {
               currentController.busAddress = pciIDCandidate;
             }
             isGraphicsController = true;
-            let endpos = line.search(/\[[0-9a-f]{4}:[0-9a-f]{4}]|$/);
-            let parts = line.substr(vgapos, endpos - vgapos).split(':');
+            const endpos = line.search(/\[[0-9a-f]{4}:[0-9a-f]{4}]|$/);
+            const parts = line.substr(vgapos, endpos - vgapos).split(':');
             currentController.busAddress = line.substr(0, vgapos).trim();
             if (parts.length > 1) {
               parts[1] = parts[1].trim();
@@ -333,14 +333,14 @@ function graphics(callback: any) {
         }
         if (isGraphicsController) {
           // within VGA details
-          let parts = line.split(':');
+          const parts = line.split(':');
           if (parts.length > 1 && parts[0].replace(/ +/g, '').toLowerCase().indexOf('devicename') !== -1 && parts[1].toLowerCase().indexOf('onboard') !== -1) {
             currentController.bus = 'Onboard';
           }
           if (parts.length > 1 && parts[0].replace(/ +/g, '').toLowerCase().indexOf('region') !== -1 && parts[1].toLowerCase().indexOf('memory') !== -1) {
-            let memparts = parts[1].split('=');
+            const memparts = parts[1].split('=');
             if (memparts.length > 1) {
-              currentController.vram = parseInt(memparts[1]);
+              currentController.vram = parseInt(memparts[1], 10);
             }
           }
         }
@@ -367,7 +367,7 @@ function graphics(callback: any) {
       }
       return devices;
     }, {});
-    for (let deviceId in devices) {
+    for (const deviceId in devices) {
       const device = devices[deviceId];
       if (device['CL_DEVICE_TYPE'] === 'CL_DEVICE_TYPE_GPU') {
         let busAddress: any;
@@ -377,9 +377,9 @@ function graphics(callback: any) {
             busAddress = bdf[0];
           }
         } else if (device['CL_DEVICE_PCI_BUS_ID_NV'] && device['CL_DEVICE_PCI_SLOT_ID_NV']) {
-          const bus = parseInt(device['CL_DEVICE_PCI_BUS_ID_NV']);
-          const slot = parseInt(device['CL_DEVICE_PCI_SLOT_ID_NV']);
-          if (!isNaN(bus) && !isNaN(slot)) {
+          const bus = parseInt(device['CL_DEVICE_PCI_BUS_ID_NV'], 10);
+          const slot = parseInt(device['CL_DEVICE_PCI_SLOT_ID_NV'], 10);
+          if (!Number.isNaN(bus) && !Number.isNaN(slot)) {
             const b = bus & 0xff;
             const d = (slot >> 3) & 0xff;
             const f = slot & 0x07;
@@ -405,8 +405,8 @@ function graphics(callback: any) {
           } else {
             controller.model = device['CL_DEVICE_NAME'];
           }
-          const memory = parseInt(device['CL_DEVICE_GLOBAL_MEM_SIZE']);
-          if (!isNaN(memory)) {
+          const memory = parseInt(device['CL_DEVICE_GLOBAL_MEM_SIZE'], 10);
+          if (!Number.isNaN(memory)) {
             controller.vram = Math.round(memory / 1024 / 1024);
           }
         }
@@ -611,10 +611,10 @@ function graphics(callback: any) {
     if (edid.substr(start, 6) === '000000') {
       start += 36;
     }
-    result.resolutionX = parseInt('0x0' + edid.substr(start + 8, 1) + edid.substr(start + 4, 2));
-    result.resolutionY = parseInt('0x0' + edid.substr(start + 14, 1) + edid.substr(start + 10, 2));
-    result.sizeX = parseInt('0x0' + edid.substr(start + 28, 1) + edid.substr(start + 24, 2));
-    result.sizeY = parseInt('0x0' + edid.substr(start + 29, 1) + edid.substr(start + 26, 2));
+    result.resolutionX = parseInt('0x0' + edid.substr(start + 8, 1) + edid.substr(start + 4, 2), 10);
+    result.resolutionY = parseInt('0x0' + edid.substr(start + 14, 1) + edid.substr(start + 10, 2), 10);
+    result.sizeX = parseInt('0x0' + edid.substr(start + 28, 1) + edid.substr(start + 24, 2), 10);
+    result.sizeY = parseInt('0x0' + edid.substr(start + 29, 1) + edid.substr(start + 26, 2), 10);
     // monitor name
     start = edid.indexOf('000000fc00'); // find first "Monitor Description Data"
     if (start >= 0) {
@@ -697,7 +697,7 @@ function graphics(callback: any) {
               currentRefreshRate: null
             };
           }
-          let parts = lines[i].split(' ');
+          const parts = lines[i].split(' ');
           currentDisplay.connection = parts[0];
           currentDisplay.main = lines[i].toLowerCase().indexOf(' primary ') >= 0;
           currentDisplay.builtin = parts[0].toLowerCase().indexOf('edp') >= 0;
@@ -709,7 +709,7 @@ function graphics(callback: any) {
             edid_raw += lines[i].toLowerCase().trim();
           } else {
             // parsen EDID
-            let edid_decoded = parseLinesLinuxEdid(edid_raw);
+            const edid_decoded = parseLinesLinuxEdid(edid_raw);
             currentDisplay.vendor = edid_decoded.vendor;
             currentDisplay.model = edid_decoded.model;
             currentDisplay.resolutionX = edid_decoded.resolutionX;
@@ -773,7 +773,7 @@ function graphics(callback: any) {
             try {
               const output = stdout.toString();
               result = parseLinesDarwin(util.plistParser(output)[0]._items);
-            } catch (e) {
+            } catch (_e) {
               util.noop();
             }
             try {
@@ -826,7 +826,7 @@ function graphics(callback: any) {
         // Raspberry: https://elinux.org/RPI_vcgencmd_usage
         if (util.isRaspberry()) {
           const cmd = "fbset -s 2> /dev/null | grep 'mode \"' ; vcgencmd get_mem gpu 2> /dev/null; tvservice -s 2> /dev/null; tvservice -n 2> /dev/null;";
-          exec(cmd, (error: any, stdout: any) => {
+          exec(cmd, (_error: any, stdout: any) => {
             const lines = stdout.toString().split('\n');
             if (lines.length > 3 && lines[0].indexOf('mode "') >= -1 && lines[2].indexOf('0x12000a') > -1) {
               const parts = lines[0].replace('mode', '').replace(/"/g, '').trim().split('x');
@@ -888,7 +888,7 @@ function graphics(callback: any) {
               let depth = 0;
               if (!error) {
                 const lines = stdout.toString().split('\n');
-                depth = parseInt(lines[0]) || 0;
+                depth = parseInt(lines[0], 10) || 0;
               }
               const cmd = 'xrandr --verbose 2>/dev/null';
               exec(cmd, (error: any, stdout: any) => {
@@ -1049,7 +1049,7 @@ function graphics(callback: any) {
               }
               resolve(result);
             });
-        } catch (e) {
+        } catch (_e) {
           if (callback) {
             callback(result);
           }
@@ -1062,13 +1062,13 @@ function graphics(callback: any) {
   function parseLinesWindowsControllers(sections: any, vections: any) {
     const memorySizes: Record<string, any> = {};
     for (const i in vections) {
-      if ({}.hasOwnProperty.call(vections, i)) {
+      if (Object.hasOwn(vections, i)) {
         if (vections[i].trim() !== '') {
           const lines = vections[i].trim().split('\n');
           const matchingDeviceId = util.getValue(lines, 'MatchingDeviceId').match(/PCI\\(VEN_[0-9A-F]{4})&(DEV_[0-9A-F]{4})(?:&(SUBSYS_[0-9A-F]{8}))?(?:&(REV_[0-9A-F]{2}))?/i);
           if (matchingDeviceId) {
-            const quadWordmemorySize = parseInt(util.getValue(lines, 'HardwareInformation.qwMemorySize'));
-            if (!isNaN(quadWordmemorySize)) {
+            const quadWordmemorySize = parseInt(util.getValue(lines, 'HardwareInformation.qwMemorySize'), 10);
+            if (!Number.isNaN(quadWordmemorySize)) {
               let deviceId = matchingDeviceId[1].toUpperCase() + '&' + matchingDeviceId[2].toUpperCase();
               if (matchingDeviceId[3]) {
                 deviceId += '&' + matchingDeviceId[3].toUpperCase();
@@ -1085,7 +1085,7 @@ function graphics(callback: any) {
 
     const controllers: any[] = [];
     for (const i in sections) {
-      if ({}.hasOwnProperty.call(sections, i)) {
+      if (Object.hasOwn(sections, i)) {
         if (sections[i].trim() !== '') {
           const lines = sections[i].trim().split('\n');
           const pnpDeviceId = util.getValue(lines, 'PNPDeviceID', ':').match(/PCI\\(VEN_[0-9A-F]{4})&(DEV_[0-9A-F]{4})(?:&(SUBSYS_[0-9A-F]{8}))?(?:&(REV_[0-9A-F]{2}))?/i);
@@ -1103,7 +1103,7 @@ function graphics(callback: any) {
             // PCI\VEN_v(4)&DEV_d(4)&SUBSYS_s(4)n(4)&REV_r(2)
             if (memorySize == null && pnpDeviceId[3] && pnpDeviceId[4]) {
               const deviceId = pnpDeviceId[1].toUpperCase() + '&' + pnpDeviceId[2].toUpperCase() + '&' + pnpDeviceId[3].toUpperCase() + '&' + pnpDeviceId[4].toUpperCase();
-              if ({}.hasOwnProperty.call(memorySizes, deviceId)) {
+              if (Object.hasOwn(memorySizes, deviceId)) {
                 memorySize = memorySizes[deviceId];
               }
             }
@@ -1111,7 +1111,7 @@ function graphics(callback: any) {
             // PCI\VEN_v(4)&DEV_d(4)&SUBSYS_s(4)n(4)
             if (memorySize == null && pnpDeviceId[3]) {
               const deviceId = pnpDeviceId[1].toUpperCase() + '&' + pnpDeviceId[2].toUpperCase() + '&' + pnpDeviceId[3].toUpperCase();
-              if ({}.hasOwnProperty.call(memorySizes, deviceId)) {
+              if (Object.hasOwn(memorySizes, deviceId)) {
                 memorySize = memorySizes[deviceId];
               }
             }
@@ -1119,7 +1119,7 @@ function graphics(callback: any) {
             // PCI\VEN_v(4)&DEV_d(4)&REV_r(2)
             if (memorySize == null && pnpDeviceId[4]) {
               const deviceId = pnpDeviceId[1].toUpperCase() + '&' + pnpDeviceId[2].toUpperCase() + '&' + pnpDeviceId[4].toUpperCase();
-              if ({}.hasOwnProperty.call(memorySizes, deviceId)) {
+              if (Object.hasOwn(memorySizes, deviceId)) {
                 memorySize = memorySizes[deviceId];
               }
             }
@@ -1127,7 +1127,7 @@ function graphics(callback: any) {
             // PCI\VEN_v(4)&DEV_d(4)
             if (memorySize == null) {
               const deviceId = pnpDeviceId[1].toUpperCase() + '&' + pnpDeviceId[2].toUpperCase();
-              if ({}.hasOwnProperty.call(memorySizes, deviceId)) {
+              if (Object.hasOwn(memorySizes, deviceId)) {
                 memorySize = memorySizes[deviceId];
               }
             }

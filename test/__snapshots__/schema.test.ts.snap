@@ -1,0 +1,425 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`schema catalog > matches schema snapshot shape 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "AllData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "cpu": {
+          "type": "object",
+        },
+        "mem": {
+          "type": "object",
+        },
+        "os": {
+          "type": "object",
+        },
+        "system": {
+          "type": "object",
+        },
+        "version": {
+          "type": "string",
+        },
+      },
+      "title": "AllData",
+      "type": "object",
+    },
+    "CapabilityRecord": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "availableTools": {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+          ],
+        },
+        "function": {
+          "type": "string",
+        },
+        "permissionsRequired": {
+          "type": "boolean",
+        },
+        "platform": {
+          "type": "string",
+        },
+        "requiredTools": {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "supported": {
+          "type": "boolean",
+        },
+      },
+      "title": "CapabilityRecord",
+      "type": "object",
+    },
+    "CpuData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "brand": {
+          "type": "string",
+        },
+        "cache": {
+          "type": "object",
+        },
+        "cores": {
+          "type": "number",
+        },
+        "flags": {
+          "type": "string",
+        },
+        "manufacturer": {
+          "type": "string",
+        },
+        "physicalCores": {
+          "type": "number",
+        },
+        "speed": {
+          "type": "number",
+        },
+      },
+      "title": "CpuData",
+      "type": "object",
+    },
+    "DiagnosticRecord": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "code": {
+          "type": "string",
+        },
+        "durationMs": {
+          "type": "number",
+        },
+        "functionName": {
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "message": {
+          "type": "string",
+        },
+        "module": {
+          "type": "string",
+        },
+        "platform": {
+          "type": "string",
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error",
+          ],
+        },
+        "timestamp": {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+      },
+      "title": "DiagnosticRecord",
+      "type": "object",
+    },
+    "DiskLayoutData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "bytesPerSector": {
+          "type": "number",
+        },
+        "device": {
+          "type": "string",
+        },
+        "name": {
+          "type": "string",
+        },
+        "size": {
+          "type": "number",
+        },
+        "type": {
+          "type": "string",
+        },
+        "vendor": {
+          "type": "string",
+        },
+      },
+      "title": "DiskLayoutData",
+      "type": "object",
+    },
+    "DockerSummary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "title": "DockerSummary",
+      "type": "array",
+    },
+    "DynamicData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "cpuCurrentSpeed": {
+          "type": "object",
+        },
+        "currentLoad": {
+          "type": "object",
+        },
+        "fsSize": {
+          "type": "array",
+        },
+        "mem": {
+          "type": "object",
+        },
+        "processes": {
+          "type": "object",
+        },
+        "time": {
+          "type": "object",
+        },
+        "users": {
+          "type": "array",
+        },
+      },
+      "title": "DynamicData",
+      "type": "object",
+    },
+    "FsSizeData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "fs": {
+          "type": "string",
+        },
+        "mount": {
+          "type": "string",
+        },
+        "size": {
+          "type": "number",
+        },
+        "type": {
+          "type": "string",
+        },
+        "use": {
+          "type": "number",
+        },
+        "used": {
+          "type": "number",
+        },
+      },
+      "title": "FsSizeData",
+      "type": "object",
+    },
+    "GraphicsData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "controllers": {
+          "items": {
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "displays": {
+          "items": {
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+      "title": "GraphicsData",
+      "type": "object",
+    },
+    "InspectEnvelope": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+          ],
+        },
+        "data": {},
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/DiagnosticRecord",
+          },
+          "type": "array",
+        },
+        "durationMs": {
+          "type": "number",
+        },
+        "platform": {
+          "type": "string",
+        },
+        "schemaVersion": {
+          "type": "string",
+        },
+        "source": {
+          "type": "string",
+        },
+      },
+      "title": "InspectEnvelope",
+      "type": "object",
+    },
+    "MemData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "active": {
+          "type": "number",
+        },
+        "available": {
+          "type": "number",
+        },
+        "free": {
+          "type": "number",
+        },
+        "swaptotal": {
+          "type": "number",
+        },
+        "swapused": {
+          "type": "number",
+        },
+        "total": {
+          "type": "number",
+        },
+        "used": {
+          "type": "number",
+        },
+      },
+      "title": "MemData",
+      "type": "object",
+    },
+    "NetworkInterfacesData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "default": {
+          "type": "boolean",
+        },
+        "iface": {
+          "type": "string",
+        },
+        "internal": {
+          "type": "boolean",
+        },
+        "ip4": {
+          "type": "string",
+        },
+        "ip6": {
+          "type": "string",
+        },
+        "mac": {
+          "type": "string",
+        },
+      },
+      "title": "NetworkInterfacesData",
+      "type": "object",
+    },
+    "OsData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "arch": {
+          "type": "string",
+        },
+        "distro": {
+          "type": "string",
+        },
+        "hostname": {
+          "type": "string",
+        },
+        "platform": {
+          "type": "string",
+        },
+        "release": {
+          "type": "string",
+        },
+      },
+      "title": "OsData",
+      "type": "object",
+    },
+    "ProcessesData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "all": {
+          "type": "number",
+        },
+        "blocked": {
+          "type": "number",
+        },
+        "list": {
+          "items": {
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "running": {
+          "type": "number",
+        },
+        "sleeping": {
+          "type": "number",
+        },
+      },
+      "title": "ProcessesData",
+      "type": "object",
+    },
+    "StaticData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "baseboard": {
+          "type": "object",
+        },
+        "bios": {
+          "type": "object",
+        },
+        "chassis": {
+          "type": "object",
+        },
+        "cpu": {
+          "type": "object",
+        },
+        "os": {
+          "type": "object",
+        },
+        "system": {
+          "type": "object",
+        },
+        "uuid": {
+          "type": "object",
+        },
+        "version": {
+          "type": "string",
+        },
+        "versions": {
+          "type": "object",
+        },
+      },
+      "title": "StaticData",
+      "type": "object",
+    },
+  },
+  "title": "SystemInspectorSchemas",
+  "type": "object",
+}
+`;

@@ -1,0 +1,15 @@
+  PID USER              %CPU %MEM COMMAND
+    1 root               1.1  0.2 launchd
+  330 root               0.5  0.2 logd
+  332 root               0.0  0.1 UserEventAgent
+  334 root               0.2  0.1 fseventsd
+  335 root               0.0  0.1 mediaremoted
+  338 root               0.0  0.1 systemstats
+  342 root               0.0  0.1 configd
+  344 root               0.0  0.1 powerd
+  345 root               0.0  0.0 IOMFB_bics_daemon
+  349 root               0.0  0.0 remoted
+  353 _corespeechd       0.0  0.0 corespeechd_system
+  355 root               0.0  0.0 watchdogd
+  359 root               0.0  0.1 mds
+  361 root               0.0  0.0 kernelmanagerd

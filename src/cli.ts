@@ -13,10 +13,9 @@
 // ==================================================================================
 
 import * as si from './index';
-import * as pkg from '../package.json';
+import { VERSION as libVersion } from './version.generated';
 import { runInteractive } from './interactive';
-
-const libVersion = pkg.version;
+import { redactData } from './redaction';
 const WIDTH = 76;
 const LABEL_WIDTH = 18;
 const VALUE_WIDTH = WIDTH - LABEL_WIDTH - 5;
@@ -205,9 +204,15 @@ function printHelp(): void {
   console.log(glyphs.horizontal.repeat(WIDTH));
   console.log(commandRow('systeminspector', 'Print static system data as JSON'));
   console.log(commandRow('systeminspector info', 'Print a readable system report'));
+  console.log(commandRow('systeminspector get cpu,mem', 'Print selected API results as JSON'));
+  console.log(commandRow('systeminspector capabilities', 'Print capability metadata'));
+  console.log(commandRow('systeminspector doctor', 'Check runtime tools and platform support'));
+  console.log(commandRow('systeminspector schema [name]', 'Print JSON schema metadata'));
+  console.log(commandRow('systeminspector watch cpu,mem', 'Stream selected API results'));
+  console.log(commandRow('systeminspector support-report', 'Print a redacted support bundle JSON'));
   console.log(commandRow('systeminspector interactive', 'Open the interactive terminal inspector'));
   console.log(commandRow('systeminspector --help', 'Show this command reference'));
-  console.log(`\n${style.dim('Default output is intentionally plain JSON for scripts and pipes.')}`);
+  console.log(`\n${style.dim('Useful flags: --json, --pretty, --redact, --timeout <ms>, --interval <ms>.')}`);
 }
 
 function printError(message: string, suggestedNextStep: string): void {
@@ -224,26 +229,141 @@ function printError(message: string, suggestedNextStep: string): void {
   console.error(lines.join('\n'));
 }
 
-async function info(): Promise<void> {
+function hasFlag(args: string[], flag: string): boolean {
+  return args.includes(flag);
+}
+
+function flagValue(args: string[], flag: string): string | undefined {
+  const index = args.indexOf(flag);
+  return index >= 0 ? args[index + 1] : undefined;
+}
+
+function timeoutOption(args: string[]): number | undefined {
+  const timeout = flagValue(args, '--timeout');
+  const parsed = timeout ? parseInt(timeout, 10) : 0;
+  return parsed > 0 ? parsed : undefined;
+}
+
+function printJson(data: unknown, pretty: boolean): void {
+  console.log(JSON.stringify(data, null, pretty ? 2 : 0));
+}
+
+function selectorFromList(list: string): si.GetValueObject {
+  return list
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .reduce((acc, key) => {
+      acc[key as keyof si.GetValueObject] = '*';
+      return acc;
+    }, {} as si.GetValueObject);
+}
+
+async function info(args: string[] = []): Promise<void> {
+  const options = { timeoutMs: timeoutOption(args), redact: hasFlag(args, '--redact') };
   console.log(boxHeader('SystemInspector', libVersion));
 
-  const osInfo = await si.osInfo();
+  const osInfo = redactData(await si.osInfo(), options.redact);
   console.log(section('Operating System'));
   printRows(osInfo as unknown as Record<string, unknown>, ['serial', 'servicepack', 'logofile', 'fqdn', 'uefi']);
 
-  const system = await si.system();
+  const system = redactData(await si.system(), options.redact);
   console.log(section('System'));
   printRows(system as unknown as Record<string, unknown>, ['serial', 'uuid', 'sku']);
 
-  const cpu = await si.cpu();
+  const cpu = await si.cpu({ timeoutMs: options.timeoutMs, redact: options.redact });
   console.log(section('CPU'));
   printRows(cpu as unknown as Record<string, unknown>, ['cache', 'governor', 'flags', 'virtualization', 'revision', 'voltage', 'vendor', 'speedMin', 'speedMax']);
   console.log();
 }
 
-async function printStaticData(): Promise<void> {
+async function printStaticData(_args: string[] = []): Promise<void> {
   const data = await si.getStaticData();
-  console.log(JSON.stringify({ ...data, time: si.time() }, null, 2));
+  printJson({ ...data, time: si.time() }, true);
+}
+
+async function printCapabilities(args: string[]): Promise<void> {
+  const data = await si.capabilities({ timeoutMs: timeoutOption(args) });
+  printJson(data, hasFlag(args, '--pretty') || !hasFlag(args, '--json'));
+}
+
+async function doctor(args: string[]): Promise<void> {
+  const caps = await si.capabilities({ timeoutMs: timeoutOption(args) });
+  const missing = caps.filter((cap) => cap.requiredTools.length > 0 && cap.availableTools.length === 0);
+  const remediation = missing.map((cap) => ({
+    function: cap.function,
+    code: 'missing_tool',
+    recommendation:
+      process.platform === 'win32'
+        ? `Install or enable required tools for ${cap.function}: ${cap.requiredTools.join(', ')}`
+        : `Install required tools for ${cap.function}: ${cap.requiredTools.join(', ')}`
+  }));
+  const payload = {
+    node: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    supportedFunctions: caps.filter((cap) => cap.supported).length,
+    totalFunctions: caps.length,
+    missingTools: missing.map((cap) => ({ function: cap.function, requiredTools: cap.requiredTools, notes: cap.notes })),
+    remediation,
+    diagnostics: si.diagnostics()
+  };
+  if (hasFlag(args, '--json')) {
+    printJson(payload, hasFlag(args, '--pretty'));
+    return;
+  }
+  console.log(boxHeader('SystemInspector Doctor', libVersion));
+  console.log(section('Runtime'));
+  printRows({ node: payload.node, platform: payload.platform, arch: payload.arch, supportedFunctions: `${payload.supportedFunctions}/${payload.totalFunctions}` });
+  console.log(section('Missing Tools'));
+  if (!payload.missingTools.length) {
+    console.log(`${style.dim('Status'.padEnd(LABEL_WIDTH))}  ${style.green('No missing required tools detected')}`);
+  } else {
+    for (const item of payload.missingTools.slice(0, 20)) {
+      console.log(`${style.dim(String(item.function).padEnd(LABEL_WIDTH))}  ${item.requiredTools.join(', ')}`);
+    }
+    if (payload.remediation.length) {
+      console.log(section('Remediation'));
+      payload.remediation.slice(0, 20).forEach((item) => {
+        console.log(`${style.dim(String(item.function).padEnd(LABEL_WIDTH))}  ${item.recommendation}`);
+      });
+    }
+  }
+}
+
+async function supportReport(args: string[]): Promise<void> {
+  const redact = hasFlag(args, '--redact') || !hasFlag(args, '--no-redact');
+  const timeoutMs = timeoutOption(args);
+  const data = await si.getAllData({ timeoutMs, redact, envelope: true });
+  const caps = await si.capabilities({ timeoutMs });
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    redacted: redact,
+    schemaVersion: si.schemaVersion(),
+    diagnostics: si.diagnostics(),
+    capabilities: caps,
+    snapshot: data
+  };
+  printJson(payload, true);
+}
+
+async function printSchema(args: string[]): Promise<void> {
+  const name = args.find((arg) => !arg.startsWith('-') && arg !== 'schema');
+  printJson(si.getSchema(name), true);
+}
+
+async function getSelected(args: string[]): Promise<void> {
+  const list = args.find((arg) => !arg.startsWith('-') && arg !== 'get') || 'cpu,osInfo';
+  const data = await si.get(selectorFromList(list));
+  printJson(data, hasFlag(args, '--pretty'));
+}
+
+async function watchSelected(args: string[]): Promise<void> {
+  const list = args.find((arg) => !arg.startsWith('-') && arg !== 'watch') || 'cpuCurrentSpeed,currentLoad,mem';
+  const interval = parseInt(flagValue(args, '--interval') || '1000', 10) || 1000;
+  for await (const snapshot of si.watch(selectorFromList(list), { intervalMs: interval, timeoutMs: timeoutOption(args) })) {
+    printJson({ time: si.time().current, data: snapshot }, hasFlag(args, '--pretty'));
+  }
 }
 
 async function main(): Promise<void> {
@@ -251,12 +371,42 @@ async function main(): Promise<void> {
   const command = args[0];
 
   if (!command) {
-    await printStaticData();
+    await printStaticData(args);
     return;
   }
 
   if (command === 'info') {
-    await info();
+    await info(args);
+    return;
+  }
+
+  if (command === 'capabilities') {
+    await printCapabilities(args);
+    return;
+  }
+
+  if (command === 'doctor') {
+    await doctor(args);
+    return;
+  }
+
+  if (command === 'schema') {
+    await printSchema(args);
+    return;
+  }
+
+  if (command === 'get') {
+    await getSelected(args);
+    return;
+  }
+
+  if (command === 'watch') {
+    await watchSelected(args);
+    return;
+  }
+
+  if (command === 'support-report') {
+    await supportReport(args);
     return;
   }
 

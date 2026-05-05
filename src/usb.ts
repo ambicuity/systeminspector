@@ -69,27 +69,27 @@ function parseLinuxUsb(usb: string): Partial<UsbData> {
     result.deviceId = null;
   }
   const idVendor = util.getValue(lines, 'idVendor', ' ', true).trim();
-  let vendorParts = idVendor.split(' ');
+  const vendorParts = idVendor.split(' ');
   vendorParts.shift();
   const vendor = vendorParts.join(' ');
 
   const idProduct = util.getValue(lines, 'idProduct', ' ', true).trim();
-  let productParts = idProduct.split(' ');
+  const productParts = idProduct.split(' ');
   productParts.shift();
   const product = productParts.join(' ');
 
   const interfaceClass = util.getValue(lines, 'bInterfaceClass', ' ', true).trim();
-  let interfaceClassParts = interfaceClass.split(' ');
+  const interfaceClassParts = interfaceClass.split(' ');
   interfaceClassParts.shift();
   const usbType = interfaceClassParts.join(' ');
 
   const iManufacturer = util.getValue(lines, 'iManufacturer', ' ', true).trim();
-  let iManufacturerParts = iManufacturer.split(' ');
+  const iManufacturerParts = iManufacturer.split(' ');
   iManufacturerParts.shift();
   const manufacturer = iManufacturerParts.join(' ');
 
   const iSerial = util.getValue(lines, 'iSerial', ' ', true).trim();
-  let iSerialParts = iSerial.split(' ');
+  const iSerialParts = iSerial.split(' ');
   iSerialParts.shift();
   const serial = iSerialParts.join(' ');
 
@@ -147,7 +147,7 @@ function parseDarwinUsb(usb: string, id?: number): Partial<UsbData> | null {
 
   usb = usb.replace(/ \|/g, '');
   usb = usb.trim();
-  let lines = usb.split('\n');
+  const lines = usb.split('\n');
   lines.shift();
   try {
     for (let i = 0; i < lines.length; i++) {
@@ -194,7 +194,7 @@ function parseDarwinUsb(usb: string, id?: number): Partial<UsbData> | null {
     } else {
       return null;
     }
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }
@@ -248,10 +248,10 @@ function parseWindowsUsb(lines: any, id: any) {
 export function usb(callback?: Callback<UsbData[] | null>): Promise<UsbData[] | null> {
   return new Promise((resolve) => {
     process.nextTick(() => {
-      let result: any[] = [];
+      const result: any[] = [];
       if (_linux) {
         const cmd = 'export LC_ALL=C; lsusb -v 2>/dev/null; unset LC_ALL';
-        exec(cmd, { maxBuffer: 1024 * 1024 * 128 }, function (error, stdout) {
+        exec(cmd, { maxBuffer: 1024 * 1024 * 128 }, (error, stdout) => {
           if (!error) {
             const parts = ('\n\n' + stdout.toString()).split('\n\nBus ');
             for (let i = 1; i < parts.length; i++) {
@@ -266,8 +266,8 @@ export function usb(callback?: Callback<UsbData[] | null>): Promise<UsbData[] | 
         });
       }
       if (_darwin) {
-        let cmd = 'ioreg -p IOUSB -c AppleUSBRootHubDevice -w0 -l';
-        exec(cmd, { maxBuffer: 1024 * 1024 * 128 }, function (error, stdout) {
+        const cmd = 'ioreg -p IOUSB -c AppleUSBRootHubDevice -w0 -l';
+        exec(cmd, { maxBuffer: 1024 * 1024 * 128 }, (error, stdout) => {
           if (!error) {
             const parts = stdout.toString().split(' +-o ');
             for (let i = 1; i < parts.length; i++) {

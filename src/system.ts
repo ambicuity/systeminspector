@@ -14,7 +14,6 @@
 import { exec, execSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
-import { uuid } from './osinfo';
 import * as util from './util';
 import type { BaseboardData, BiosData, Callback, ChassisData, SystemData } from './types';
 
@@ -44,7 +43,7 @@ export function system(callback?: Callback<SystemData>): Promise<SystemData> {
       };
 
       if (_linux || _freebsd || _openbsd || _netbsd) {
-        exec('export LC_ALL=C; dmidecode -t system 2>/dev/null; unset LC_ALL', (error, stdout) => {
+        exec('export LC_ALL=C; dmidecode -t system 2>/dev/null; unset LC_ALL', (_error, stdout) => {
           let lines = stdout.toString().split('\n');
           result.manufacturer = cleanDefaults(util.getValue(lines, 'manufacturer'));
           result.model = cleanDefaults(util.getValue(lines, 'product name'));
@@ -215,11 +214,11 @@ export function system(callback?: Callback<SystemData>): Promise<SystemData> {
             // Check Raspberry Pi
             fs.readFile('/proc/cpuinfo', (error, stdout) => {
               if (!error) {
-                let lines = stdout.toString().split('\n');
+                const lines = stdout.toString().split('\n');
                 result.model = util.getValue(lines, 'hardware', ':', true).toUpperCase();
                 result.version = util.getValue(lines, 'revision', ':', true).toLowerCase();
                 result.serial = util.getValue(lines, 'serial', ':', true);
-                const model = util.getValue(lines, 'model:', ':', true);
+                const _model = util.getValue(lines, 'model:', ':', true);
                 // reference values: https://elinux.org/RPi_HardwareHistory
                 // https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
                 if (util.isRaspberry(lines)) {
@@ -335,7 +334,7 @@ export function system(callback?: Callback<SystemData>): Promise<SystemData> {
                   result.sku = util.getValue(lines, 'systemsku', ':');
                 if (!result.virtual) {
                   util.powerShell('Get-CimInstance Win32_bios | select Version, SerialNumber, SMBIOSBIOSVersion').then((stdout) => {
-                      let lines = stdout.toString();
+                      const lines = stdout.toString();
                       if (
                         lines.indexOf('VRTUAL') >= 0 ||
                         lines.indexOf('A M I ') >= 0 ||
@@ -411,7 +410,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
         } else {
           cmd = 'export LC_ALL=C; dmidecode -t bios 2>/dev/null; unset LC_ALL';
         }
-        exec(cmd, (error, stdout) => {
+        exec(cmd, (_error, stdout) => {
           let lines = stdout.toString().split('\n');
           result.vendor = util.getValue(lines, 'Vendor');
           result.version = util.getValue(lines, 'Version');
@@ -419,7 +418,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
           result.releaseDate = util.parseDateTime(datetime).date;
           result.revision = util.getValue(lines, 'BIOS Revision');
           result.serial = util.getValue(lines, 'SerialNumber');
-          let language = util.getValue(lines, 'Currently Installed Language').split('|')[0];
+          const language = util.getValue(lines, 'Currently Installed Language').split('|')[0];
           if (language) {
             result.language = language;
           }
@@ -443,7 +442,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
             result.version = !result.version ? util.getValue(lines, 'bios_version') : result.version;
             datetime = util.getValue(lines, 'bios_date');
             result.releaseDate = !result.releaseDate ? util.parseDateTime(datetime).date : result.releaseDate;
-          } catch (e) {
+          } catch (_e) {
             util.noop();
           }
           if (callback) {
@@ -454,7 +453,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
       }
       if (_darwin) {
         result.vendor = 'Apple Inc.';
-        exec('system_profiler SPHardwareDataType -json', (error, stdout) => {
+        exec('system_profiler SPHardwareDataType -json', (_error, stdout) => {
           try {
             const hardwareData = JSON.parse(stdout.toString());
             if (hardwareData && hardwareData.SPHardwareDataType && hardwareData.SPHardwareDataType.length) {
@@ -462,7 +461,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
               bootRomVersion = bootRomVersion ? bootRomVersion.split('(')[0].trim() : null;
               result.version = bootRomVersion;
             }
-          } catch (e) {
+          } catch (_e) {
             util.noop();
           }
           if (callback) {
@@ -509,7 +508,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
               }
               resolve(result);
             });
-        } catch (e) {
+        } catch (_e) {
           if (callback) {
             callback(result);
           }
@@ -629,7 +628,7 @@ export function baseboard(callback?: Callback<BaseboardData>): Promise<Baseboard
       if (_windows) {
         try {
           const workload: Promise<unknown>[] = [];
-          const win10plus = parseInt(os.release()) >= 10;
+          const win10plus = parseInt(os.release(), 10) >= 10;
           const maxCapacityAttribute = win10plus ? 'MaxCapacityEx' : 'MaxCapacity';
           workload.push(util.powerShell('Get-CimInstance Win32_baseboard | select Model,Manufacturer,Product,Version,SerialNumber,PartNumber,SKU | fl'));
           workload.push(util.powerShell(`Get-CimInstance Win32_physicalmemoryarray | select ${maxCapacityAttribute}, MemoryDevices | fl`));
@@ -752,11 +751,11 @@ export function chassis(callback?: Callback<ChassisData>): Promise<ChassisData> 
             echo -n "chassis_type: "; cat /sys/devices/virtual/dmi/id/chassis_type 2>/dev/null; echo;
             echo -n "chassis_vendor: "; cat /sys/devices/virtual/dmi/id/chassis_vendor 2>/dev/null; echo;
             echo -n "chassis_version: "; cat /sys/devices/virtual/dmi/id/chassis_version 2>/dev/null; echo;`;
-        exec(cmd, (error, stdout) => {
-          let lines = stdout.toString().split('\n');
+        exec(cmd, (_error, stdout) => {
+          const lines = stdout.toString().split('\n');
           result.manufacturer = cleanDefaults(util.getValue(lines, 'chassis_vendor'));
-          const ctype = parseInt(util.getValue(lines, 'chassis_type').replace(/\D/g, ''));
-          result.type = cleanDefaults(ctype && !isNaN(ctype) && ctype < chassisTypes.length ? chassisTypes[ctype - 1] : '');
+          const ctype = parseInt(util.getValue(lines, 'chassis_type').replace(/\D/g, ''), 10);
+          result.type = cleanDefaults(ctype && !Number.isNaN(ctype) && ctype < chassisTypes.length ? chassisTypes[ctype - 1] : '');
           result.version = cleanDefaults(util.getValue(lines, 'chassis_version'));
           result.serial = cleanDefaults(util.getValue(lines, 'chassis_serial'));
           result.assetTag = cleanDefaults(util.getValue(lines, 'chassis_asset_tag'));
@@ -800,8 +799,8 @@ export function chassis(callback?: Callback<ChassisData>): Promise<ChassisData> 
 
               result.manufacturer = cleanDefaults(util.getValue(lines, 'manufacturer', ':'));
               result.model = cleanDefaults(util.getValue(lines, 'model', ':'));
-              const ctype = parseInt(util.getValue(lines, 'ChassisTypes', ':').replace(/\D/g, ''));
-              result.type = ctype && !isNaN(ctype) && ctype < chassisTypes.length ? chassisTypes[ctype - 1] : '';
+              const ctype = parseInt(util.getValue(lines, 'ChassisTypes', ':').replace(/\D/g, ''), 10);
+              result.type = ctype && !Number.isNaN(ctype) && ctype < chassisTypes.length ? chassisTypes[ctype - 1] : '';
               result.version = cleanDefaults(util.getValue(lines, 'version', ':'));
               result.serial = cleanDefaults(util.getValue(lines, 'serialnumber', ':'));
               result.assetTag = cleanDefaults(util.getValue(lines, 'partnumber', ':'));

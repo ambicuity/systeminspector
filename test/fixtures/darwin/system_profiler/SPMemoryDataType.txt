@@ -1,0 +1,6 @@
+Memory:
+
+      Memory: 8 GB
+      Type: LPDDR5
+      Manufacturer: Hynix
+

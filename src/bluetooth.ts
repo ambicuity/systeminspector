@@ -110,8 +110,8 @@ function parseBluetoothManufacturer(str: any) {
 }
 
 function parseBluetoothVendor(str: any) {
-  const id = parseInt(str);
-  if (!isNaN(id)) return bluetoothVendors[id];
+  const id = parseInt(str, 10);
+  if (!Number.isNaN(id)) return bluetoothVendors[id];
 }
 
 function parseLinuxBluetoothInfo(lines: string[], macAddr1: string | null, macAddr2: string | null): Partial<BluetoothDeviceData> {
@@ -165,7 +165,7 @@ function parseWindowsBluetooth(lines: string[]): Partial<BluetoothDeviceData> {
 export function bluetoothDevices(callback?: Callback<BluetoothDeviceData[] | null>): Promise<BluetoothDeviceData[] | null> {
   return new Promise((resolve) => {
     process.nextTick(() => {
-      let result: any[] = [];
+      const result: any[] = [];
       if (_linux) {
         // get files in /var/lib/bluetooth/ recursive
         const btFiles = util.getFilesInPath('/var/lib/bluetooth/');
@@ -197,7 +197,7 @@ export function bluetoothDevices(callback?: Callback<BluetoothDeviceData[] | nul
         resolve(result);
       }
       if (_darwin) {
-        let cmd = 'system_profiler SPBluetoothDataType -json';
+        const cmd = 'system_profiler SPBluetoothDataType -json';
         exec(cmd, (error, stdout) => {
           if (!error) {
             try {

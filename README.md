@@ -33,6 +33,16 @@ Requires **Node.js ≥ 18.0.0**.
 
 ## Quick Start
 
+### ESM (Vite, Next.js, Bun, modern Node ESM)
+
+```js
+import * as si from '@ambicuity/systeminspector';
+
+const cpu = await si.cpu();
+const os = await si.osInfo();
+console.log(cpu, os);
+```
+
 ### CommonJS
 
 ```js
@@ -40,16 +50,14 @@ const si = require('@ambicuity/systeminspector');
 
 async function main() {
   const cpu = await si.cpu();
-  console.log(cpu);
-
   const os = await si.osInfo();
-  console.log(os);
+  console.log(cpu, os);
 }
 
 main();
 ```
 
-### Callback Style
+### Callback Style (deprecated, removed in v2.0)
 
 ```js
 const si = require('@ambicuity/systeminspector');
@@ -58,6 +66,8 @@ si.cpu((data) => {
   console.log(data);
 });
 ```
+
+> **Tip:** the modern call form is `await si.cpu({ timeoutMs, signal, redact, envelope })`. Callback overloads still work but carry an `@deprecated` JSDoc tag and will be removed in v2.0. See [docs/general.md](docs/general.md) for the full options surface.
 
 ---
 
@@ -74,6 +84,21 @@ npx @ambicuity/systeminspector
 
 # Interactive terminal inspector
 npx @ambicuity/systeminspector interactive
+
+# Check support, tools, permissions, and diagnostics
+npx @ambicuity/systeminspector doctor
+
+# Inspect capability metadata
+npx @ambicuity/systeminspector capabilities --json
+
+# Select APIs and print JSON
+npx @ambicuity/systeminspector get cpu,mem,osInfo --pretty
+
+# Print schema metadata
+npx @ambicuity/systeminspector schema CpuData
+
+# Redact sensitive values from readable reports
+npx @ambicuity/systeminspector info --redact
 
 # Help
 npx @ambicuity/systeminspector --help
@@ -208,12 +233,55 @@ All functions (except `version()` and `time()`) return Promises and accept an op
 | Function | Returns | Description |
 |---|---|---|
 | `diagnostics()` | `DiagnosticData[]` | Non-breaking diagnostic records |
+| `diagnostics({ sinceLastCall: true })` | `DiagnosticData[]` | Drain diagnostics recorded since the previous call |
 | `clearDiagnostics()` | `void` | Clear diagnostic buffer |
+| `onDiagnostic(cb)` | `() => void` | Subscribe to diagnostic records |
 
 ```js
 await si.diskLayout();
 console.log(si.diagnostics()); // check for missing tools, permission issues, etc.
 si.clearDiagnostics();
+```
+
+### Capabilities
+
+Use capabilities before collecting data when you need to explain missing values or build support UIs.
+
+```js
+const all = await si.capabilities();
+const docker = await si.capability('dockerContainers');
+```
+
+Capability records include the function name, platform, required tools, detected tools, permission hints, support status, and confidence.
+
+### Options, Envelopes, and Redaction
+
+Existing return shapes remain unchanged. Newer APIs can opt into metadata with an options object while keeping callbacks last.
+
+```js
+const cpu = await si.cpu({ timeoutMs: 3000 });
+
+const detailed = await si.cpu({
+  envelope: true,
+  timeoutMs: 3000,
+  redact: true
+});
+
+console.log(detailed.data);
+console.log(detailed.diagnostics);
+```
+
+Redaction can hide serial numbers, MAC addresses, usernames, IP addresses, UUIDs, and process arguments when supported by the call path.
+
+### Watch and Schemas
+
+```js
+for await (const snapshot of si.watch({ cpuCurrentSpeed: '*', mem: '*' }, { intervalMs: 1000 })) {
+  console.log(snapshot);
+}
+
+console.log(si.schemaVersion());
+console.log(si.getSchema('CpuData'));
 ```
 
 ---
@@ -363,6 +431,23 @@ setInterval(() => {
 Some APIs depend on platform tools such as PowerShell, `sensors`, Docker,
 VirtualBox, or `smartmontools`. Unsupported values may be returned as `null`,
 empty strings, or empty collections.
+
+### Platform Support Matrix
+
+| Function | Linux | macOS | Windows | BSD | SunOS | Android |
+|---|---:|---:|---:|---:|---:|---:|
+| `cpu`, `mem`, `osInfo`, `time`, `currentLoad` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cpuTemperature` | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| `system`, `bios`, `baseboard`, `chassis` | ⚠️ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| `fsSize`, `blockDevices`, `diskLayout` | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| `fsStats`, `disksIO` | ✅ | ✅ | ❌ | ⚠️ | ❌ | ✅ |
+| `networkInterfaces`, `networkStats` | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| `wifiNetworks`, `wifiInterfaces`, `wifiConnections` | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ⚠️ |
+| `docker*` | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ |
+| `vboxInfo` | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ |
+| `usb`, `audio`, `bluetoothDevices`, `printer`, `graphics` | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+Legend: ✅ supported, ⚠️ partial or requires platform tools/permissions, ❌ unsupported or not currently implemented.
 
 ---
 

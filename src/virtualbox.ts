@@ -22,7 +22,7 @@ export function vboxInfo(callback?: Callback<VboxInfoData[]>): Promise<VboxInfoD
   return new Promise((resolve) => {
     process.nextTick(() => {
       try {
-        exec(util.getVboxmanage() + ' list vms --long', (error, stdout) => {
+        exec(util.getVboxmanage() + ' list vms --long', (_error, stdout) => {
           const parts = (os.EOL + stdout.toString()).split(os.EOL + 'Name:');
           parts.shift();
           parts.forEach((part) => {

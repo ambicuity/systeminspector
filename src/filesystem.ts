@@ -17,6 +17,7 @@ import * as util from './util';
 import * as fs from 'fs';
 import * as os from 'os';
 import { exec, execSync } from 'child_process';
+import { parseDfDarwin } from './parsers';
 
 const execPromiseSave = util.promisifySave(exec);
 
@@ -180,23 +181,49 @@ function fsSize(drive: any, callback: any) {
             util.noop();
           }
         }
-        exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
-          const lines = filterLines(stdout);
-          data = parseDf(lines);
+        util.runCommandSpec({ feature: 'fsSize', command: 'sh', args: ['-c', cmd], maxBufferBytes: 1024 * 1024 }).then((stdout: any) => {
+          if (_darwin) {
+            // Use the typed pure parser from src/parsers.ts (fixture-tested
+            // against authentic `df -kP` captures). Map to the legacy
+            // FsSizeData shape: bytes (not kB) and the existing
+            // getmacOsFsType + osMounts lookups for type and rw.
+            data = parseDfDarwin(String(stdout || ''))
+              .filter((row) => row.filesystem.startsWith('/'))
+              .map((row) => {
+                const size = row.totalKb * 1024;
+                const used = row.usedKb * 1024;
+                const available = row.availableKb * 1024;
+                const denominator = used + available;
+                return {
+                  fs: row.filesystem,
+                  type: getmacOsFsType(row.filesystem),
+                  size,
+                  used,
+                  available,
+                  use: denominator > 0 ? parseFloat(((100.0 * used) / denominator).toFixed(2)) : 0,
+                  mount: row.mount,
+                  rw: osMounts && Object.keys(osMounts).length > 0 ? osMounts[row.filesystem] || false : null
+                };
+              })
+              .filter((row, idx, arr) => arr.findIndex((other) => other.fs === row.fs && other.type === row.type && other.mount === row.mount) === idx);
+          } else {
+            const lines = filterLines(stdout || '');
+            data = parseDf(lines);
+          }
           if (drive) {
             data = data.filter((item) => {
               return item.fs.toLowerCase().indexOf(drive.toLowerCase()) >= 0 || item.mount.toLowerCase().indexOf(drive.toLowerCase()) >= 0;
             });
           }
-          if ((!error || data.length) && stdout.toString().trim() !== '') {
+          if (data.length && String(stdout || '').trim() !== '') {
             if (callback) {
               callback(data);
             }
             resolve(data);
           } else {
-            exec('df -kPT 2>/dev/null', { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+            util.runCommandSpec({ feature: 'fsSizeFallback', command: 'sh', args: ['-c', 'df -kPT 2>/dev/null'], maxBufferBytes: 1024 * 1024 }).then((stdout: any) => {
               // fixed issue alpine fallback
-              const lines = filterLines(stdout);
+              const lines = filterLines(stdout || '');
               data = parseDf(lines);
               if (callback) {
                 callback(data);
@@ -1189,7 +1216,7 @@ function diskLayout(callback: any) {
               let devices: any[] = [];
               try {
                 const outJSON = JSON.parse(out);
-                if (outJSON && {}.hasOwnProperty.call(outJSON, 'blockdevices')) {
+                if (outJSON && Object.hasOwn(outJSON, 'blockdevices')) {
                   devices = outJSON.blockdevices.filter((item: any) => {
                     return (
                       item.type === 'disk' &&
@@ -1308,7 +1335,7 @@ function diskLayout(callback: any) {
                 });
                 if (cmd) {
                   cmd = cmd + 'printf "\n"';
-                  exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+                  exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                     const lines = stdout.toString().split('\n');
                     lines.forEach((line: any) => {
                       if (line) {
@@ -1562,7 +1589,7 @@ function diskLayout(callback: any) {
                     }
                   });
                   commitResult(result);
-                } catch (e) {
+                } catch (_e) {
                   util.pushDiagnostic({
                     feature: 'diskLayout',
                     dependency: 'smartmontools',
@@ -1573,7 +1600,7 @@ function diskLayout(callback: any) {
                   });
                   if (cmd) {
                     cmd = cmd + 'printf "\n"';
-                    exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+                    exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                       const lines = stdout.toString().split('\n');
                       lines.forEach((line: any) => {
                         if (line) {
@@ -1603,7 +1630,7 @@ function diskLayout(callback: any) {
               });
             } else if (cmd) {
               cmd = cmd + 'printf "\n"';
-              exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+              exec(cmd, { maxBuffer: 1024 * 1024 }, (_error: any, stdout: any) => {
                 const lines = stdout.toString().split('\n');
                 lines.forEach((line: any) => {
                   if (line) {

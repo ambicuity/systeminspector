@@ -75,3 +75,9 @@ Windows functions use PowerShell to avoid encoding problems with special charact
 #### Finding New Issues
 
 If you still have problems, include the relevant function result and diagnostics() output when opening an issue.
+
+For safer issue reports, prefer a redacted support bundle:
+
+```bash
+systeminspector support-report --redact > support-report.json
+```

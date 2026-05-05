@@ -1,0 +1,11 @@
+Filesystem     1024-blocks      Used Available Capacity  Mounted on
+/dev/disk3s1s1   482797652  12163828  38615968    24%    /
+devfs                  197       197         0   100%    /dev
+/dev/disk3s6     482797652   6574616  38615968    15%    /System/Volumes/VM
+/dev/disk3s2     482797652   8634208  38615968    19%    /System/Volumes/Preboot
+/dev/disk3s4     482797652     74720  38615968     1%    /System/Volumes/Update
+/dev/disk1s2        512000      6164    493944     2%    /System/Volumes/xarts
+/dev/disk1s1        512000      5916    493944     2%    /System/Volumes/iSCPreboot
+/dev/disk1s3        512000      1116    493944     1%    /System/Volumes/Hardware
+/dev/disk3s5     482797652 415307672  38615968    92%    /System/Volumes/Data
+map auto_home            0         0         0   100%    /System/Volumes/Data/home
