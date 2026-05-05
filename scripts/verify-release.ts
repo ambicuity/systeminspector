@@ -67,11 +67,17 @@ const requiredExports = [
   'usb',
   'audio',
   'bluetoothDevices',
+  'capabilities',
+  'capability',
+  'schemaVersion',
+  'getSchema',
+  'onDiagnostic',
   'getStaticData',
   'getDynamicData',
   'getAllData',
   'get',
-  'observe'
+  'observe',
+  'watch'
 ] as const;
 
 function supportsUnicode(): boolean {

@@ -180,23 +180,23 @@ function fsSize(drive: any, callback: any) {
             util.noop();
           }
         }
-        exec(cmd, { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
-          const lines = filterLines(stdout);
+        util.runCommandSpec({ feature: 'fsSize', command: 'sh', args: ['-c', cmd], maxBufferBytes: 1024 * 1024 }).then((stdout: any) => {
+          const lines = filterLines(stdout || '');
           data = parseDf(lines);
           if (drive) {
             data = data.filter((item) => {
               return item.fs.toLowerCase().indexOf(drive.toLowerCase()) >= 0 || item.mount.toLowerCase().indexOf(drive.toLowerCase()) >= 0;
             });
           }
-          if ((!error || data.length) && stdout.toString().trim() !== '') {
+          if (data.length && String(stdout || '').trim() !== '') {
             if (callback) {
               callback(data);
             }
             resolve(data);
           } else {
-            exec('df -kPT 2>/dev/null', { maxBuffer: 1024 * 1024 }, (error: any, stdout: any) => {
+            util.runCommandSpec({ feature: 'fsSizeFallback', command: 'sh', args: ['-c', 'df -kPT 2>/dev/null'], maxBufferBytes: 1024 * 1024 }).then((stdout: any) => {
               // fixed issue alpine fallback
-              const lines = filterLines(stdout);
+              const lines = filterLines(stdout || '');
               data = parseDf(lines);
               if (callback) {
                 callback(data);
@@ -1189,7 +1189,7 @@ function diskLayout(callback: any) {
               let devices: any[] = [];
               try {
                 const outJSON = JSON.parse(out);
-                if (outJSON && {}.hasOwnProperty.call(outJSON, 'blockdevices')) {
+                if (outJSON && Object.hasOwn(outJSON, 'blockdevices')) {
                   devices = outJSON.blockdevices.filter((item: any) => {
                     return (
                       item.type === 'disk' &&

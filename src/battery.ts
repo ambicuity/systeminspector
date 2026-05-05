@@ -30,7 +30,7 @@ const _sunos = _platform === 'sunos';
 
 function parseWinBatteryPart(lines: any, designedCapacity: any, fullChargeCapacity: any) {
   const result: Partial<BatteryData> & { status: number } = { status: -1 };
-  let status = parseInt(util.getValue(lines, 'BatteryStatus', ':').trim(), 10) || 0;
+  const status = parseInt(util.getValue(lines, 'BatteryStatus', ':').trim(), 10) || 0;
   // let status = util.getValue(lines, 'BatteryStatus', ':').trim();
   // 1 = "Discharging"
   // 2 = "On A/C"
@@ -109,7 +109,7 @@ function battery(callback?: Callback<BatteryData>) {
         if (battery_path) {
           fs.readFile(battery_path + 'uevent', (error, stdout) => {
             if (!error) {
-              let lines = stdout.toString().split('\n');
+              const lines = stdout.toString().split('\n');
 
               result.isCharging = util.getValue(lines, 'POWER_SUPPLY_STATUS', '=').toLowerCase() === 'charging';
               result.acConnected = acConnected || result.isCharging;
@@ -174,7 +174,7 @@ function battery(callback?: Callback<BatteryData>) {
       }
       if (_freebsd || _openbsd || _netbsd) {
         exec('sysctl -i hw.acpi.battery hw.acpi.acline', (error, stdout) => {
-          let lines = stdout.toString().split('\n');
+          const lines = stdout.toString().split('\n');
           const batteries = parseInt('0' + util.getValue(lines, 'hw.acpi.battery.units'), 10);
           const percent = parseInt('0' + util.getValue(lines, 'hw.acpi.battery.life'), 10);
           result.hasBattery = batteries > 0;
@@ -197,7 +197,7 @@ function battery(callback?: Callback<BatteryData>) {
           'ioreg -n AppleSmartBattery -r | egrep "CycleCount|IsCharging|DesignCapacity|MaxCapacity|CurrentCapacity|DeviceName|BatterySerialNumber|Serial|TimeRemaining|Voltage"; pmset -g batt | grep %',
           (error, stdout) => {
             if (stdout) {
-              let lines = stdout.toString().replace(/ +/g, '').replace(/"+/g, '').replace(/-/g, '').split('\n');
+              const lines = stdout.toString().replace(/ +/g, '').replace(/"+/g, '').replace(/-/g, '').split('\n');
               result.cycleCount = parseInt('0' + util.getValue(lines, 'cyclecount', '='), 10);
               result.voltage = parseInt('0' + util.getValue(lines, 'voltage', '='), 10) / 1000.0;
               result.capacityUnit = result.voltage ? 'mWh' : 'mAh';
@@ -209,9 +209,9 @@ function battery(callback?: Callback<BatteryData>) {
               result.model = util.getValue(lines, 'DeviceName', '=');
               let percent = null;
               const line = util.getValue(lines, 'internal', 'Battery');
-              let parts = line.split(';');
+              const parts = line.split(';');
               if (parts && parts[0]) {
-                let parts2 = parts[0].split('\t');
+                const parts2 = parts[0].split('\t');
                 if (parts2 && parts2[1]) {
                   percent = parseFloat(parts2[1].trim().replace(/%/g, ''));
                 }

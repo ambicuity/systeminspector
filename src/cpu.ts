@@ -57,7 +57,7 @@ let _current_cpu = {
   rawCurrentLoadSteal: 0,
   rawCurrentLoadGuest: 0
 };
-let _cpus: any[] = [];
+const _cpus: any[] = [];
 let _corecount = 0;
 
 const AMDBaseFrequencies: Record<string, string> = {
@@ -842,7 +842,7 @@ function cpuBrandManufacturer(res: any) {
   res.brand = res.brand.replace(/CPU+/g, '').replace(/\s+/g, ' ').trim();
   res.manufacturer = cpuManufacturer(res.brand);
 
-  let parts = res.brand.split(' ');
+  const parts = res.brand.split(' ');
   parts.shift();
   res.brand = parts.join(' ');
   return res;
@@ -850,9 +850,9 @@ function cpuBrandManufacturer(res: any) {
 
 function getAMDSpeed(brand: any) {
   let result = '0';
-  for (let key in AMDBaseFrequencies) {
-    if ({}.hasOwnProperty.call(AMDBaseFrequencies, key)) {
-      let parts = key.split('|');
+  for (const key in AMDBaseFrequencies) {
+    if (Object.hasOwn(AMDBaseFrequencies, key)) {
+      const parts = key.split('|');
       let found = 0;
       parts.forEach((item) => {
         if (brand.indexOf(item) > -1) {
@@ -1080,8 +1080,8 @@ function getCpu() {
 
             result = cpuBrandManufacturer(result);
             result.vendor = cpuManufacturer(util.getValue(lines, 'manufacturer'));
-            let sigStr = util.getValue(lines, 'signature');
-            let sig = sigStr.split(',');
+            const sigStr = util.getValue(lines, 'signature');
+            const sig = sigStr.split(',');
             for (let i = 0; i < sig.length; i++) {
               sig[i] = sig[i].trim();
             }
@@ -1093,8 +1093,8 @@ function getCpu() {
             result.voltage = isNaN(voltage) ? '' : voltage.toFixed(2);
             for (let i = 0; i < cache.length; i++) {
               lines = cache[i].split('\n');
-              let cacheTypeParts = util.getValue(lines, 'Socket Designation').toLowerCase().replace(' ', '-').split('-');
-              let cacheType = cacheTypeParts.length ? cacheTypeParts[0] : '';
+              const cacheTypeParts = util.getValue(lines, 'Socket Designation').toLowerCase().replace(' ', '-').split('-');
+              const cacheType = cacheTypeParts.length ? cacheTypeParts[0] : '';
               const sizeParts = util.getValue(lines, 'Installed Size').split(' ');
               let size = parseInt(sizeParts[0], 10);
               const unit = sizeParts.length > 1 ? sizeParts[1] : 'kb';
@@ -1135,8 +1135,8 @@ function getCpu() {
             workload.push(util.powerShell('(Get-CimInstance Win32_ComputerSystem).HypervisorPresent'));
 
             Promise.all(workload).then((data) => {
-              let lines = data[0].split('\r\n');
-              let name = util.getValue(lines, 'name', ':') || '';
+              const lines = data[0].split('\r\n');
+              const name = util.getValue(lines, 'name', ':') || '';
               if (name.indexOf('@') >= 0) {
                 result.brand = name.split('@')[0].trim();
                 result.speed = name.split('@')[1] ? parseFloat(name.split('@')[1].trim()) : 0;
@@ -1157,7 +1157,7 @@ function getCpu() {
               }
               result.speedMin = result.speed;
 
-              let description = util.getValue(lines, 'description', ':').split(' ');
+              const description = util.getValue(lines, 'description', ':').split(' ');
               for (let i = 0; i < description.length; i++) {
                 if (description[i].toLowerCase().startsWith('family') && i + 1 < description.length && description[i + 1]) {
                   result.family = description[i + 1];
@@ -1236,8 +1236,8 @@ function getCpuCurrentSpeedSync() {
   const cores: any[] = [];
   const speeds: any[] = [];
 
-  if (cpus && cpus.length && Object.prototype.hasOwnProperty.call(cpus[0], 'speed')) {
-    for (let i in cpus) {
+  if (cpus && cpus.length && Object.hasOwn(cpus[0], 'speed')) {
+    for (const i in cpus) {
       speeds.push(cpus[i].speed > 100 ? (cpus[i].speed + 1) / 1000 : cpus[i].speed / 10);
     }
   } else if (_linux) {
@@ -1246,7 +1246,7 @@ function getCpuCurrentSpeedSync() {
         .toString()
         .split('\n')
         .filter((line: any) => line.length > 0);
-      for (let i in speedStrings) {
+      for (const i in speedStrings) {
         speeds.push(Math.floor(parseInt(speedStrings[i], 10) / 10) / 100);
       }
     } catch {
@@ -1470,7 +1470,7 @@ function cpuTemperature(callback: any) {
               if (result.main === null) {
                 result.main = Math.round(result.cores.reduce((a: any, b: any) => a + b, 0) / result.cores.length);
               }
-              let maxtmp = Math.max.apply(Math, result.cores);
+              const maxtmp = Math.max.apply(Math, result.cores);
               result.max = maxtmp > result.main ? maxtmp : result.main;
             }
             if (result.main !== null) {
@@ -1702,13 +1702,13 @@ function cpuFlags(callback: any) {
         try {
           exec('reg query "HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0" /v FeatureSet', util.execOptsWin, (error: any, stdout: any) => {
             if (!error) {
-              let flag_hex = stdout.split('0x').pop().trim();
-              let flag_bin_unpadded = parseInt(flag_hex, 16).toString(2);
-              let flag_bin = '0'.repeat(32 - flag_bin_unpadded.length) + flag_bin_unpadded;
+              const flag_hex = stdout.split('0x').pop().trim();
+              const flag_bin_unpadded = parseInt(flag_hex, 16).toString(2);
+              const flag_bin = '0'.repeat(32 - flag_bin_unpadded.length) + flag_bin_unpadded;
               // empty flags are the reserved fields in the CPUID feature bit list
               // as found on wikipedia:
               // https://en.wikipedia.org/wiki/CPUID
-              let all_flags = [
+              const all_flags = [
                 'fpu',
                 'vme',
                 'de',
@@ -1765,7 +1765,7 @@ function cpuFlags(callback: any) {
         try {
           exec('export LC_ALL=C; lscpu; unset LC_ALL', (error: any, stdout: any) => {
             if (!error) {
-              let lines = stdout.toString().split('\n');
+              const lines = stdout.toString().split('\n');
               lines.forEach((line: any) => {
                 if (line.split(':')[0].toUpperCase().indexOf('FLAGS') !== -1) {
                   result = line.split(':')[1].trim().toLowerCase();
@@ -1775,7 +1775,7 @@ function cpuFlags(callback: any) {
             if (!result) {
               fs.readFile('/proc/cpuinfo', (error: any, stdout: any) => {
                 if (!error) {
-                  let lines = stdout.toString().split('\n');
+                  const lines = stdout.toString().split('\n');
                   result = util.getValue(lines, 'features', ':', true).toLowerCase();
                 }
                 if (callback) {
@@ -1820,7 +1820,7 @@ function cpuFlags(callback: any) {
       if (_darwin) {
         exec('sysctl machdep.cpu.features', (error: any, stdout: any) => {
           if (!error) {
-            let lines = stdout.toString().split('\n');
+            const lines = stdout.toString().split('\n');
             if (lines.length > 0 && lines[0].indexOf('machdep.cpu.features:') !== -1) {
               result = lines[0].split(':')[1].trim().toLowerCase();
             }
@@ -1897,8 +1897,8 @@ function cpuCache(callback: any) {
           }
           for (let i = 0; i < cache.length; i++) {
             const lines = cache[i].split('\n');
-            let cacheTypeParts = util.getValue(lines, 'Socket Designation').toLowerCase().replace(' ', '-').split('-');
-            let cacheType = cacheTypeParts.length ? cacheTypeParts[0] : '';
+            const cacheTypeParts = util.getValue(lines, 'Socket Designation').toLowerCase().replace(' ', '-').split('-');
+            const cacheType = cacheTypeParts.length ? cacheTypeParts[0] : '';
             const sizeParts = util.getValue(lines, 'Installed Size').split(' ');
             let size = parseInt(sizeParts[0], 10);
             const unit = sizeParts.length > 1 ? sizeParts[1] : 'kb';
@@ -1921,9 +1921,9 @@ function cpuCache(callback: any) {
       if (_darwin) {
         exec('sysctl hw.l1icachesize hw.l1dcachesize hw.l2cachesize hw.l3cachesize', (error: any, stdout: any) => {
           if (!error) {
-            let lines = stdout.toString().split('\n');
+            const lines = stdout.toString().split('\n');
             lines.forEach((line: any) => {
-              let parts = line.split(':');
+              const parts = line.split(':');
               if (parts[0].toLowerCase().indexOf('hw.l1icachesize') !== -1) {
                 result.l1d = parseInt(parts[1].trim()) * (parts[1].indexOf('K') !== -1 ? 1024 : 1);
               }
@@ -1984,7 +1984,7 @@ function parseWinCache(linesProc: any, linesCache: any) {
   };
 
   // Win32_processor
-  let lines = linesProc.split('\r\n');
+  const lines = linesProc.split('\r\n');
   result.l1d = 0;
   result.l1i = 0;
   result.l2 = util.getValue(lines, 'l2cachesize', ':');
@@ -2077,7 +2077,7 @@ function getLoad() {
               lines.shift();
               if (lines.length === cpus.length) {
                 for (let i = 0; i < lines.length; i++) {
-                  let parts = lines[i].split(' ');
+                  const parts = lines[i].split(' ');
                   if (parts.length >= 10) {
                     const steal = parseFloat(parts[8]) || 0;
                     const guest = parseFloat(parts[9]) || 0;

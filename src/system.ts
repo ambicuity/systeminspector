@@ -215,7 +215,7 @@ export function system(callback?: Callback<SystemData>): Promise<SystemData> {
             // Check Raspberry Pi
             fs.readFile('/proc/cpuinfo', (error, stdout) => {
               if (!error) {
-                let lines = stdout.toString().split('\n');
+                const lines = stdout.toString().split('\n');
                 result.model = util.getValue(lines, 'hardware', ':', true).toUpperCase();
                 result.version = util.getValue(lines, 'revision', ':', true).toLowerCase();
                 result.serial = util.getValue(lines, 'serial', ':', true);
@@ -335,7 +335,7 @@ export function system(callback?: Callback<SystemData>): Promise<SystemData> {
                   result.sku = util.getValue(lines, 'systemsku', ':');
                 if (!result.virtual) {
                   util.powerShell('Get-CimInstance Win32_bios | select Version, SerialNumber, SMBIOSBIOSVersion').then((stdout) => {
-                      let lines = stdout.toString();
+                      const lines = stdout.toString();
                       if (
                         lines.indexOf('VRTUAL') >= 0 ||
                         lines.indexOf('A M I ') >= 0 ||
@@ -419,7 +419,7 @@ export function bios(callback?: Callback<BiosData>): Promise<BiosData> {
           result.releaseDate = util.parseDateTime(datetime).date;
           result.revision = util.getValue(lines, 'BIOS Revision');
           result.serial = util.getValue(lines, 'SerialNumber');
-          let language = util.getValue(lines, 'Currently Installed Language').split('|')[0];
+          const language = util.getValue(lines, 'Currently Installed Language').split('|')[0];
           if (language) {
             result.language = language;
           }
@@ -753,7 +753,7 @@ export function chassis(callback?: Callback<ChassisData>): Promise<ChassisData> 
             echo -n "chassis_vendor: "; cat /sys/devices/virtual/dmi/id/chassis_vendor 2>/dev/null; echo;
             echo -n "chassis_version: "; cat /sys/devices/virtual/dmi/id/chassis_version 2>/dev/null; echo;`;
         exec(cmd, (error, stdout) => {
-          let lines = stdout.toString().split('\n');
+          const lines = stdout.toString().split('\n');
           result.manufacturer = cleanDefaults(util.getValue(lines, 'chassis_vendor'));
           const ctype = parseInt(util.getValue(lines, 'chassis_type').replace(/\D/g, ''));
           result.type = cleanDefaults(ctype && !isNaN(ctype) && ctype < chassisTypes.length ? chassisTypes[ctype - 1] : '');

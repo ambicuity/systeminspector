@@ -27,8 +27,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (with warning budget)
+        run: |
+          set +e
+          npm run lint > lint-output.txt 2>&1
+          LINT_EXIT=$?
+          set -e
+          cat lint-output.txt
+          WARNINGS=$(grep -Eo "Found [0-9]+ warnings" lint-output.txt | tail -n 1 | grep -Eo "[0-9]+" || echo "0")
+          echo "Biome warnings: $WARNINGS"
+          if [ "$WARNINGS" -gt 200 ]; then
+            echo "Warning budget exceeded (200)."
+            exit 1
+          fi
+          if [ "$LINT_EXIT" -ne 0 ]; then
+            exit "$LINT_EXIT"
+          fi
 
       - name: Typecheck
         run: npm run typecheck

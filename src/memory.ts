@@ -176,7 +176,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
               result.slab = result.slab ? result.slab * 1024 : 0;
               result.buffcache = result.buffers + result.cached + result.slab;
 
-              let available = parseInt(util.getValue(lines, 'memavailable'), 10);
+              const available = parseInt(util.getValue(lines, 'memavailable'), 10);
               result.available = available ? available * 1024 : result.free + result.buffcache;
               result.active = result.total - result.available;
 
@@ -250,7 +250,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
       if (_darwin) {
         let pageSize = 4096;
         try {
-          let sysPpageSize = util.toInt(execSync('sysctl -n vm.pagesize').toString());
+          const sysPpageSize = util.toInt(execSync('sysctl -n vm.pagesize').toString());
           pageSize = sysPpageSize || pageSize;
         } catch {
           util.noop();
@@ -258,7 +258,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
         try {
           exec('vm_stat 2>/dev/null | egrep "Pages active|Pages inactive"', (error, stdout) => {
             if (!error) {
-              let lines = stdout.toString().split('\n');
+              const lines = stdout.toString().split('\n');
               result.active = (parseInt(util.getValue(lines, 'Pages active'), 10) || 0) * pageSize;
               result.reclaimable = (parseInt(util.getValue(lines, 'Pages inactive'), 10) || 0) * pageSize;
               result.buffcache = result.used - result.active;
@@ -266,10 +266,10 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
             }
             exec('sysctl -n vm.swapusage 2>/dev/null', (error, stdout) => {
               if (!error) {
-                let lines = stdout.toString().split('\n');
+                const lines = stdout.toString().split('\n');
                 if (lines.length > 0) {
-                  let firstline = lines[0].replace(/,/g, '.').replace(/M/g, '');
-                  let lineArray = firstline.trim().split('  ');
+                  const firstline = lines[0].replace(/,/g, '.').replace(/M/g, '');
+                  const lineArray = firstline.trim().split('  ');
                   lineArray.forEach((line) => {
                     if (line.toLowerCase().indexOf('total') !== -1) {
                       result.swaptotal = parseFloat(line.split('=')[1].trim()) * 1024 * 1024;
@@ -335,7 +335,7 @@ export function mem(callback?: Callback<MemData>): Promise<MemData> {
 export function memLayout(callback?: Callback<MemLayoutData[]>): Promise<MemLayoutData[]> {
   function getManufacturer(manId: string): string {
     const manIdSearch = manId.replace('0x', '').toUpperCase();
-    if (manIdSearch.length >= 4 && {}.hasOwnProperty.call(RAM_manufacturers, manIdSearch)) {
+    if (manIdSearch.length >= 4 && Object.hasOwn(RAM_manufacturers, manIdSearch)) {
       return RAM_manufacturers[manIdSearch];
     }
     return manId;
@@ -417,7 +417,7 @@ export function memLayout(callback?: Callback<MemLayoutData[]>): Promise<MemLayo
               try {
                 let stdout = execSync('cat /proc/cpuinfo 2>/dev/null', util.execOptsLinux);
                 let lines = stdout.toString().split('\n');
-                let version = util.getValue(lines, 'revision', ':', true).toLowerCase();
+                const version = util.getValue(lines, 'revision', ':', true).toLowerCase();
 
                 if (util.isRaspberry(lines)) {
                   const clockSpeed = {
@@ -437,14 +437,14 @@ export function memLayout(callback?: Callback<MemLayoutData[]>): Promise<MemLayo
 
                   stdout = execSync('vcgencmd get_config sdram_freq 2>/dev/null', util.execOptsLinux);
                   lines = stdout.toString().split('\n');
-                  let freq = parseInt(util.getValue(lines, 'sdram_freq', '=', true), 10) || 0;
+                  const freq = parseInt(util.getValue(lines, 'sdram_freq', '=', true), 10) || 0;
                   if (freq) {
                     result[0].clockSpeed = freq;
                   }
 
                   stdout = execSync('vcgencmd measure_volts sdram_p 2>/dev/null', util.execOptsLinux);
                   lines = stdout.toString().split('\n');
-                  let voltage = parseFloat(util.getValue(lines, 'volt', '=', true)) || 0;
+                  const voltage = parseFloat(util.getValue(lines, 'volt', '=', true)) || 0;
                   if (voltage) {
                     result[0].voltageConfigured = voltage;
                     result[0].voltageMin = voltage;

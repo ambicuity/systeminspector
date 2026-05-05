@@ -149,13 +149,13 @@ const _wifi_frequencies: Record<string, number> = {
 };
 
 function wifiFrequencyFromChannel(channel: string | number | null): number | null {
-  return {}.hasOwnProperty.call(_wifi_frequencies, String(channel)) ? _wifi_frequencies[channel as keyof typeof _wifi_frequencies] : null;
+  return  Object.hasOwn(_wifi_frequencies, String(channel)) ? _wifi_frequencies[channel as keyof typeof _wifi_frequencies] : null;
 }
 
 function wifiChannelFromFrequencs(frequency: number): number {
   let channel = 0;
-  for (let key in _wifi_frequencies) {
-    if ({}.hasOwnProperty.call(_wifi_frequencies, key)) {
+  for (const key in _wifi_frequencies) {
+    if (Object.hasOwn(_wifi_frequencies, key)) {
       if (_wifi_frequencies[key] === frequency) {
         channel = util.toInt(key);
       }
@@ -312,7 +312,7 @@ function getWifiNetworkListNmi(): WifiNetworkData[] {
 function getWifiNetworkListIw(iface: string): WifiNetworkData[] | -1 {
   const result: WifiNetworkData[] = [];
   try {
-    let iwlistParts = execSync(`export LC_ALL=C; iwlist ${iface} scan 2>&1; unset LC_ALL`, util.execOptsLinux).toString().split('        Cell ');
+    const iwlistParts = execSync(`export LC_ALL=C; iwlist ${iface} scan 2>&1; unset LC_ALL`, util.execOptsLinux).toString().split('        Cell ');
     if (iwlistParts[0].indexOf('resource busy') >= 0) {
       return -1;
     }

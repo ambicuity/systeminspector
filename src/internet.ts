@@ -32,7 +32,7 @@ const _sunos = _platform === 'sunos';
 export function inetChecksite(url: string, callback?: Callback<InetChecksiteData>): Promise<InetChecksiteData> {
   return new Promise((resolve) => {
     process.nextTick(() => {
-      let result = {
+      const result = {
         url: url,
         ok: false,
         status: 404,
@@ -211,7 +211,7 @@ export function inetLatency(host?: string | Callback<number | null>, callback?: 
               lines.shift();
               lines.forEach((line) => {
                 if ((line.toLowerCase().match(/ms/g) || []).length === 3) {
-                  let l = line.replace(/ +/g, ' ').split(' ');
+                  const l = line.replace(/ +/g, ' ').split(' ');
                   if (l.length > 6) {
                     result = parseFloat(l[l.length - 1]);
                   }

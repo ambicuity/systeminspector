@@ -40,4 +40,63 @@ describe('SystemInspector Static API', () => {
     expect(typeof cpuData.manufacturer).toBe('string');
     expect(typeof cpuData.cores).toBe('number');
   });
+
+  it('should expose capability metadata', async () => {
+    const caps = await si.capabilities({ timeoutMs: 1000 });
+    expect(Array.isArray(caps)).toBe(true);
+    const cpuCapability = await si.capability('cpu', { timeoutMs: 1000 });
+    expect(cpuCapability.function).toBe('cpu');
+    expect(typeof cpuCapability.supported).toBe('boolean');
+    expect(Array.isArray(cpuCapability.requiredTools)).toBe(true);
+  });
+
+  it('should support non-breaking envelope mode for cpu', async () => {
+    const envelope = await si.cpu({ envelope: true, timeoutMs: 5000 });
+    expect(envelope.schemaVersion).toBe(si.schemaVersion());
+    expect(envelope.platform).toBe(process.platform);
+    expect(envelope.data).toBeDefined();
+    expect(typeof envelope.durationMs).toBe('number');
+    expect(Array.isArray(envelope.diagnostics)).toBe(true);
+  });
+
+  it('should support envelope mode for core high-use APIs', async () => {
+    const memEnvelope = await si.mem({ envelope: true, timeoutMs: 5000 });
+    expect(memEnvelope.schemaVersion).toBe(si.schemaVersion());
+    const osEnvelope = await si.osInfo({ envelope: true, timeoutMs: 5000 });
+    expect(osEnvelope.data.platform).toBeDefined();
+    const staticEnvelope = await si.getStaticData({ envelope: true, timeoutMs: 5000 });
+    expect(staticEnvelope.source).toBe('getStaticData');
+  });
+
+  it('should support diagnostics sinceLastCall and listeners', () => {
+    si.clearDiagnostics();
+    const seen: unknown[] = [];
+    const unsubscribe = si.onDiagnostic((record) => seen.push(record));
+    // pushDiagnostic is intentionally internal, so use clear/sinceLastCall to verify API shape.
+    expect(si.diagnostics({ sinceLastCall: true })).toEqual([]);
+    unsubscribe();
+    expect(seen).toEqual([]);
+  });
+
+  it('should expose schema metadata', () => {
+    expect(si.schemaVersion()).toMatch(/^\d+\.\d+/);
+    const schema = si.getSchema('CpuData');
+    expect(schema.title).toBe('CpuData');
+    expect(schema.type).toBe('object');
+    expect(si.getSchema('MemData').title).toBe('MemData');
+    expect(si.getSchema('NetworkInterfacesData').title).toBe('NetworkInterfacesData');
+  });
+
+  it('should accept redaction options with envelope mode', async () => {
+    const envelope = await si.cpu({ envelope: true, redact: true, timeoutMs: 5000 });
+    expect(envelope.data).toBeDefined();
+    expect(envelope.schemaVersion).toBe(si.schemaVersion());
+  });
+
+  it('should expose selector builder for get()', async () => {
+    const data = await si.get({
+      cpu: si.select().fields('manufacturer', 'cores').toString()
+    });
+    expect(data.cpu).toBeDefined();
+  });
 });

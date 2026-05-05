@@ -165,7 +165,7 @@ function parseWindowsBluetooth(lines: string[]): Partial<BluetoothDeviceData> {
 export function bluetoothDevices(callback?: Callback<BluetoothDeviceData[] | null>): Promise<BluetoothDeviceData[] | null> {
   return new Promise((resolve) => {
     process.nextTick(() => {
-      let result: any[] = [];
+      const result: any[] = [];
       if (_linux) {
         // get files in /var/lib/bluetooth/ recursive
         const btFiles = util.getFilesInPath('/var/lib/bluetooth/');
@@ -197,7 +197,7 @@ export function bluetoothDevices(callback?: Callback<BluetoothDeviceData[] | nul
         resolve(result);
       }
       if (_darwin) {
-        let cmd = 'system_profiler SPBluetoothDataType -json';
+        const cmd = 'system_profiler SPBluetoothDataType -json';
         exec(cmd, (error, stdout) => {
           if (!error) {
             try {
