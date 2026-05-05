@@ -33,7 +33,9 @@
   },
   "scripts": {
     "clean": "rm -rf dist *.tgz",
-    "prebuild": "node scripts/write-version.js",
+    "prebuild": "node scripts/write-version.js && npm run codegen:api",
+    "codegen:api": "tsx scripts/codegen-public-api.ts",
+    "codegen:api:check": "tsx scripts/codegen-public-api.ts --check",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p tsconfig.json && chmod +x dist/cjs/cli.js",
     "build:esm": "tsc -p tsconfig.esm.json && node scripts/finalize-esm.js",

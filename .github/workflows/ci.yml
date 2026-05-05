@@ -44,6 +44,9 @@ jobs:
             exit "$LINT_EXIT"
           fi
 
+      - name: Codegen freshness (public API)
+        run: npm run codegen:api:check
+
       - name: Typecheck
         run: npm run typecheck
 
