@@ -1377,7 +1377,7 @@ function networkStatsSingle(iface: any) {
       let tx_dropped = 0;
       let tx_errors = 0;
 
-      let cmd, lines, stats;
+      let cmd: string, lines: string[], stats: any;
       if (
         !_network[ifaceSanitized] ||
         (_network[ifaceSanitized] && !_network[ifaceSanitized].ms) ||

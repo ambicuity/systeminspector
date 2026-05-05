@@ -1224,7 +1224,7 @@ function uuid(callback: any) {
         hardware: '',
         macs: getUniqueMacAdresses()
       };
-      let parts;
+      let parts: string[];
 
       if (_darwin) {
         exec('system_profiler SPHardwareDataType -json', (error: any, stdout: any) => {

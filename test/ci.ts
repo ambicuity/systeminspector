@@ -1,6 +1,6 @@
 const si = require('../dist/cjs/index');
 
-const testWithTimeout = async (fn: Function) => {
+const testWithTimeout = async (fn: () => unknown) => {
   return new Promise((resolve, reject) => {
     (async () => {
       const timeout = setTimeout(() => {

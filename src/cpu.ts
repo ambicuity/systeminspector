@@ -1438,8 +1438,8 @@ function cpuTemperature(callback: any) {
           util.noop();
         }
 
-        const cmd =
-          'for mon in /sys/class/hwmon/hwmon*; do for label in "$mon"/temp*_label; do if [ -f $label ]; then value=${label%_*}_input; echo $(cat "$label")___$(cat "$value"); fi; done; done;';
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: ${label%_*}_input is shell parameter expansion, not a JS template literal.
+        const cmd = 'for mon in /sys/class/hwmon/hwmon*; do for label in "$mon"/temp*_label; do if [ -f $label ]; then value=${label%_*}_input; echo $(cat "$label")___$(cat "$value"); fi; done; done;';
         try {
           exec(cmd, (_error: any, stdout: any) => {
             stdout = stdout.toString();

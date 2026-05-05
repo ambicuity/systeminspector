@@ -144,7 +144,7 @@ export function inetLatency(host?: string | Callback<number | null>, callback?: 
         }
         return resolve(null);
       }
-      let params;
+      let params: string[] = [];
       if (_linux || _freebsd || _openbsd || _netbsd || _darwin) {
         if (_linux) {
           params = ['-c', '2', '-w', '3', hostSanitized];

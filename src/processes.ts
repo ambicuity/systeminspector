@@ -204,7 +204,7 @@ function services(srv: any, callback: any) {
               if (stdout) {
                 const lines = stdout.replace(/ +/g, ' ').replace(/,+/g, '.').split('\n');
                 srvs.forEach((srv) => {
-                  let ps;
+                  let ps: string[];
                   if (_darwin) {
                     ps = lines.filter((e: any) => e.toLowerCase().indexOf(srv) !== -1);
                   } else {

@@ -184,8 +184,8 @@ function getValue(lines: string[], property: string, separator?: string, trimmed
 
 function decodeEscapeSequence(str: any, base: any) {
   base = base || 16;
-  return str.replace(/\\x([0-9A-Fa-f]{2})/g, function () {
-    return String.fromCharCode(parseInt(arguments[1], base));
+  return str.replace(/\\x([0-9A-Fa-f]{2})/g, (_match: string, hex: string) => {
+    return String.fromCharCode(parseInt(hex, base));
   });
 }
 
@@ -520,7 +520,7 @@ function getVboxmanage() {
 
 function powerShellProceedResults(data: any) {
   let id = '';
-  let parts;
+  let parts: string[];
   let res = '';
   // startID
   if (data.indexOf(_psCmdStart) >= 0) {
@@ -1633,8 +1633,8 @@ function promiseAll(promises: Array<Promise<any>>): Promise<{ errors: any[]; res
 }
 
 function promisify(nodeStyleFunction: (...args: any[]) => void): (...args: any[]) => Promise<any> {
-  return () => {
-    const args = Array.prototype.slice.call(arguments);
+  return (...callerArgs: any[]) => {
+    const args = callerArgs.slice();
     return new Promise((resolve, reject) => {
       args.push((err: any, data: any) => {
         if (err) {
@@ -1649,8 +1649,8 @@ function promisify(nodeStyleFunction: (...args: any[]) => void): (...args: any[]
 }
 
 function promisifySave(nodeStyleFunction: (...args: any[]) => void): (...args: any[]) => Promise<any> {
-  return () => {
-    const args = Array.prototype.slice.call(arguments);
+  return (...callerArgs: any[]) => {
+    const args = callerArgs.slice();
     return new Promise((resolve) => {
       args.push((_err: any, data: any) => {
         resolve(data);
