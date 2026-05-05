@@ -33,6 +33,16 @@ Requires **Node.js ≥ 18.0.0**.
 
 ## Quick Start
 
+### ESM (Vite, Next.js, Bun, modern Node ESM)
+
+```js
+import * as si from '@ambicuity/systeminspector';
+
+const cpu = await si.cpu();
+const os = await si.osInfo();
+console.log(cpu, os);
+```
+
 ### CommonJS
 
 ```js
@@ -40,16 +50,14 @@ const si = require('@ambicuity/systeminspector');
 
 async function main() {
   const cpu = await si.cpu();
-  console.log(cpu);
-
   const os = await si.osInfo();
-  console.log(os);
+  console.log(cpu, os);
 }
 
 main();
 ```
 
-### Callback Style
+### Callback Style (deprecated, removed in v2.0)
 
 ```js
 const si = require('@ambicuity/systeminspector');
@@ -58,6 +66,8 @@ si.cpu((data) => {
   console.log(data);
 });
 ```
+
+> **Tip:** the modern call form is `await si.cpu({ timeoutMs, signal, redact, envelope })`. Callback overloads still work but carry an `@deprecated` JSDoc tag and will be removed in v2.0. See [docs/general.md](docs/general.md) for the full options surface.
 
 ---
 
