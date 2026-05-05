@@ -17,6 +17,7 @@ import * as util from './util';
 import * as fs from 'fs';
 import * as os from 'os';
 import { exec, execSync } from 'child_process';
+import { parseDfDarwin } from './parsers';
 
 const execPromiseSave = util.promisifySave(exec);
 
@@ -181,8 +182,34 @@ function fsSize(drive: any, callback: any) {
           }
         }
         util.runCommandSpec({ feature: 'fsSize', command: 'sh', args: ['-c', cmd], maxBufferBytes: 1024 * 1024 }).then((stdout: any) => {
-          const lines = filterLines(stdout || '');
-          data = parseDf(lines);
+          if (_darwin) {
+            // Use the typed pure parser from src/parsers.ts (fixture-tested
+            // against authentic `df -kP` captures). Map to the legacy
+            // FsSizeData shape: bytes (not kB) and the existing
+            // getmacOsFsType + osMounts lookups for type and rw.
+            data = parseDfDarwin(String(stdout || ''))
+              .filter((row) => row.filesystem.startsWith('/'))
+              .map((row) => {
+                const size = row.totalKb * 1024;
+                const used = row.usedKb * 1024;
+                const available = row.availableKb * 1024;
+                const denominator = used + available;
+                return {
+                  fs: row.filesystem,
+                  type: getmacOsFsType(row.filesystem),
+                  size,
+                  used,
+                  available,
+                  use: denominator > 0 ? parseFloat(((100.0 * used) / denominator).toFixed(2)) : 0,
+                  mount: row.mount,
+                  rw: osMounts && Object.keys(osMounts).length > 0 ? osMounts[row.filesystem] || false : null
+                };
+              })
+              .filter((row, idx, arr) => arr.findIndex((other) => other.fs === row.fs && other.type === row.type && other.mount === row.mount) === idx);
+          } else {
+            const lines = filterLines(stdout || '');
+            data = parseDf(lines);
+          }
           if (drive) {
             data = data.filter((item) => {
               return item.fs.toLowerCase().indexOf(drive.toLowerCase()) >= 0 || item.mount.toLowerCase().indexOf(drive.toLowerCase()) >= 0;
